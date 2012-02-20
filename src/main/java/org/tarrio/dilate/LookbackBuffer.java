@@ -135,9 +135,6 @@ class LookbackBuffer {
 		Match bestMatch = null;
 		for (int pos : positions) {
 			Match match = checkMatch(pos);
-			if (match.getDistance() > 32767) {
-				System.out.println("foo");
-			}
 			if (bestMatch == null || match.getLength() > bestMatch.getLength()) {
 				bestMatch = match;
 			}

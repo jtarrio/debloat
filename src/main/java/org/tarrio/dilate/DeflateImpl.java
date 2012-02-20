@@ -118,9 +118,6 @@ public class DeflateImpl implements Compressor {
 			for (int i = 0; i < match.getLength(); ++i) {
 				buf[i] = buffer.read();
 			}
-			if (match.getDistance() > 32767) {
-				System.out.println("foo");
-			}
 			return new Chunk(match.getDistance(), buf);
 		} else {
 			byte[] buf = new byte[targetSize];
