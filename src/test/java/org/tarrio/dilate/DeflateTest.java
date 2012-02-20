@@ -10,7 +10,7 @@ import org.easymock.IMocksControl;
 
 import junit.framework.TestCase;
 
-public class CompressorTest extends TestCase {
+public class DeflateTest extends TestCase {
 
 	private IMocksControl control;
 	private InputStream input;
@@ -31,15 +31,15 @@ public class CompressorTest extends TestCase {
 		blockEncoder = control.createMock(Codec.BlockEncoder.class);
 		decoder = control.createMock(Codec.Decoder.class);
 		blockDecoder = control.createMock(Codec.BlockDecoder.class);
-		compressor = new CompressorImpl(codec);
+		compressor = new DeflateImpl(codec);
 	}
 	
 	public void testEncodesChunks() throws Exception {
 		input = new ByteArrayInputStream("abcdebcdfghij".getBytes());
 
-		Chunk chunk1 = new Chunk(0, 5, "abcde".getBytes());
-		Chunk chunk2 = new Chunk(4, 3, "bcd".getBytes());
-		Chunk chunk3 = new Chunk(0, 5, "fghij".getBytes());
+		Chunk chunk1 = new Chunk(0, "abcde".getBytes());
+		Chunk chunk2 = new Chunk(4, "bcd".getBytes());
+		Chunk chunk3 = new Chunk(0, "fghij".getBytes());
 		
 		EasyMock.expect(codec.getEncoder(output)).andReturn(encoder);
 		EasyMock.expect(encoder.newBlock()).andReturn(blockEncoder);
@@ -56,14 +56,14 @@ public class CompressorTest extends TestCase {
 	}
 
 	public void testEncodesChunksOverBlockBoundaries() throws Exception {
-		compressor = new CompressorImpl(codec, 4);
+		compressor = new DeflateImpl(codec, 4);
 		input = new ByteArrayInputStream("abcdebcdefghij".getBytes());
 
-		Chunk chunk1 = new Chunk(0, 4, "abcd".getBytes());
-		Chunk chunk2 = new Chunk(0, 1, "e".getBytes());
-		Chunk chunk3 = new Chunk(4, 4, "bcde".getBytes());
-		Chunk chunk4 = new Chunk(0, 4, "fghi".getBytes());
-		Chunk chunk5 = new Chunk(0, 1, "j".getBytes());
+		Chunk chunk1 = new Chunk(0, "abcd".getBytes());
+		Chunk chunk2 = new Chunk(0, "e".getBytes());
+		Chunk chunk3 = new Chunk(4, "bcde".getBytes());
+		Chunk chunk4 = new Chunk(0, "fghi".getBytes());
+		Chunk chunk5 = new Chunk(0, "j".getBytes());
 		
 		EasyMock.expect(codec.getEncoder(output)).andReturn(encoder);
 		EasyMock.expect(encoder.newBlock()).andReturn(blockEncoder);
@@ -88,9 +88,9 @@ public class CompressorTest extends TestCase {
 	}
 	
 	public void testDecodesChunks() throws Exception {
-		Chunk chunk1 = new Chunk(0, 5, "abcde".getBytes());
-		Chunk chunk2 = new Chunk(4, 3, "bcd".getBytes());
-		Chunk chunk3 = new Chunk(0, 5, "fghij".getBytes());
+		Chunk chunk1 = new Chunk(0, "abcde".getBytes());
+		Chunk chunk2 = new Chunk(4, "bcd".getBytes());
+		Chunk chunk3 = new Chunk(0, "fghij".getBytes());
 
 		EasyMock.expect(codec.getDecoder(input)).andReturn(decoder);
 		EasyMock.expect(decoder.nextBlock()).andReturn(blockDecoder);
@@ -107,11 +107,11 @@ public class CompressorTest extends TestCase {
 	}
 
 	public void testDecodesChunksOverBlockBoundaries() throws Exception {
-		compressor = new CompressorImpl(codec, 4);
-		Chunk chunk1 = new Chunk(0, 5, "abcde".getBytes());
-		Chunk chunk2 = new Chunk(4, 2, "bc".getBytes());
-		Chunk chunk3 = new Chunk(0, 3, "fghi".getBytes());
-		Chunk chunk4 = new Chunk(0, 1, "j".getBytes());
+		compressor = new DeflateImpl(codec, 4);
+		Chunk chunk1 = new Chunk(0, "abcde".getBytes());
+		Chunk chunk2 = new Chunk(4, "bc".getBytes());
+		Chunk chunk3 = new Chunk(0, "fghi".getBytes());
+		Chunk chunk4 = new Chunk(0, "j".getBytes());
 
 		EasyMock.expect(codec.getDecoder(input)).andReturn(decoder);
 		EasyMock.expect(decoder.nextBlock()).andReturn(blockDecoder);

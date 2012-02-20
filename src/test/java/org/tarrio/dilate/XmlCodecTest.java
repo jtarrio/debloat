@@ -14,10 +14,10 @@ import junit.framework.TestCase;
 public class XmlCodecTest extends TestCase {
 
 	private static final Chunk[] CHUNKS = new Chunk[] {
-			new Chunk(0, 5, "abcde".getBytes()),
-			new Chunk(4, 2, "bc".getBytes()),
-			new Chunk(0, 3, "fgh".getBytes()), new Chunk(0, 1, "i".getBytes()),
-			new Chunk(0, 1, "j".getBytes()) };
+			new Chunk(0, "abcde".getBytes()),
+			new Chunk(4, "bc".getBytes()),
+			new Chunk(0, "fgh".getBytes()), new Chunk(0, "i".getBytes()),
+			new Chunk(0, "j".getBytes()) };
 
 	private static final String UNCOMPRESSED_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			+ "<compressedData>\n  <block>\n"

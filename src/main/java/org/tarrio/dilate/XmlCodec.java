@@ -15,6 +15,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+/**
+ * A Codec that stores the compressed data in XML.
+ * 
+ * @author Jacobo
+ */
 class XmlCodec implements Codec {
 
 	private static final String ROOT_TAG = "compressedData";
@@ -54,6 +59,9 @@ class XmlCodec implements Codec {
 		return new DecoderImpl(input);
 	}
 
+	/**
+	 * A class to encode compressed data into XML documents.
+	 */
 	private class EncoderImpl implements Encoder {
 
 		private final OutputStream output;
@@ -74,6 +82,10 @@ class XmlCodec implements Codec {
 			output.write(XML_FOOTER);
 		}
 
+		/**
+		 * A class to encode a compressed data block into a XML &lt;block&gt;
+		 * tag.
+		 */
 		private class BlockEncoderImpl implements BlockEncoder {
 
 			private boolean lastBlock = false;
@@ -125,8 +137,10 @@ class XmlCodec implements Codec {
 		}
 	}
 
+	/**
+	 * A class to decode compressed data stored in XML documents.
+	 */
 	private class DecoderImpl implements Decoder {
-
 		private byte[] buffer;
 		private int bufPos;
 		private NodeList blocks;
@@ -161,8 +175,10 @@ class XmlCodec implements Codec {
 			return new BlockDecoderImpl((Element) blocks.item(currentBlock++));
 		}
 
+		/**
+		 * A class to decode a block's worth of data.
+		 */
 		private class BlockDecoderImpl implements BlockDecoder {
-
 			private boolean lastBlock;
 			private NodeList data;
 			private int currentDatum;
@@ -190,10 +206,22 @@ class XmlCodec implements Codec {
 				} else if (REFERENCE_TAG.equals(datum.getTagName())) {
 					return decodeReference(datum);
 				} else {
-					throw new IOException(String.format("Expected %s or %s, found %s", BYTE_TAG, REFERENCE_TAG, datum.getTagName()));
+					throw new IOException(String.format(
+							"Expected %s or %s, found %s", BYTE_TAG,
+							REFERENCE_TAG, datum.getTagName()));
 				}
 			}
 
+			/**
+			 * Decodes the next few contiguous stream of &lt;byte&gt; elements
+			 * into a single chunk.
+			 * 
+			 * @param datum
+			 *            The first &lt;byte&gt; element in the stream.
+			 * @return A chunk representing the decoded bytes.
+			 * @throws IOException
+			 *             If there was any problem decoding the data.
+			 */
 			private Chunk decodeBytes(Element datum) throws IOException {
 				int read = 0;
 				while (datum != null && BYTE_TAG.equals(datum.getTagName())
@@ -208,10 +236,20 @@ class XmlCodec implements Codec {
 						currentDatum++;
 					}
 				}
-				return new Chunk(0, read, Arrays.copyOfRange(buffer, bufPos
+				return new Chunk(0, Arrays.copyOfRange(buffer, bufPos
 						- read, bufPos));
 			}
 
+			/**
+			 * Decodes a reference into a chunk.
+			 * 
+			 * @param datum
+			 *            The element to decode.
+			 * @return A chunk representing the reference along with the bytes
+			 *         it stands for.
+			 * @throws IOException
+			 *             If there was any problem decoding the data.
+			 */
 			private Chunk decodeReference(Element datum) throws IOException {
 				checkHasAttribute(datum, DISTANCE_ATTRIB);
 				checkHasAttribute(datum, LENGTH_ATTRIB);
@@ -221,10 +259,16 @@ class XmlCodec implements Codec {
 				for (int i = 0; i < length; ++i) {
 					recordByte(buffer[bufPos - distance]);
 				}
-				return new Chunk(distance, length, Arrays.copyOfRange(buffer,
+				return new Chunk(distance, Arrays.copyOfRange(buffer,
 						bufPos - distance - length, bufPos - distance));
 			}
 
+			/**
+			 * Stores a byte into the lookback buffer.
+			 * 
+			 * @param theByte
+			 *            The byte to store.
+			 */
 			private void recordByte(byte theByte) {
 				if (bufPos == buffer.length) {
 					System.arraycopy(buffer, Chunk.MAX_LENGTH, buffer, 0,
@@ -234,6 +278,17 @@ class XmlCodec implements Codec {
 				buffer[bufPos++] = theByte;
 			}
 
+			/**
+			 * Checks whether an element has a given attribute and throws an
+			 * exception if it doesn't.
+			 * 
+			 * @param datum
+			 *            The element to check.
+			 * @param attribute
+			 *            The attribute to check for.
+			 * @throws IOException
+			 *             If the attribute is not present in the element.
+			 */
 			private void checkHasAttribute(Element datum, String attribute)
 					throws IOException {
 				if (!datum.hasAttribute(attribute)) {

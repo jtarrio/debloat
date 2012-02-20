@@ -2,6 +2,17 @@ package org.tarrio.dilate;
 
 import java.util.Arrays;
 
+/**
+ * A representation of compressed data. It can represent new data or data from
+ * the past. It contains a match distance and a length, along with the bytes it
+ * represents.
+ * 
+ * The match distance is 0 if the chunk represents new data. A value higher than
+ * 0 represents data in the past: 1 would be the character before the current
+ * position, 2 the character before that, etc.
+ * 
+ * @author Jacobo
+ */
 public class Chunk {
 
 	public static final int MAX_LENGTH = 32767;
@@ -10,20 +21,31 @@ public class Chunk {
 	private int length;
 	private byte[] bytes;
 
-	public Chunk(int distance, int length, byte[] bytes) {
+	/**
+	 * Creates a chunk with the given distance, length and bytes.
+	 */
+	Chunk(int distance, byte[] bytes) {
 		this.distance = distance;
-		this.length = length;
 		this.bytes = bytes;
 	}
 
+	/**
+	 * Returns the match distance for this chunk.
+	 */
 	public int getDistance() {
 		return distance;
 	}
 
+	/**
+	 * Returns the length of this chunk.
+	 */
 	public int getLength() {
-		return length;
+		return bytes.length;
 	}
 
+	/**
+	 * Returns the byte representation of this chunk.
+	 */
 	public byte[] getBytes() {
 		return bytes;
 	}
