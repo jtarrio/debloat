@@ -13,12 +13,11 @@ import junit.framework.TestCase;
 public class Lz77CompressorTest extends TestCase {
 
 	private static final Symbol[] SYMBOLS = new Symbol[] {
-			new Symbol((byte) 'a', 0, 0), new Symbol((byte) 'b', 0, 0),
-			new Symbol((byte) 'c', 0, 0), new Symbol((byte) 'd', 0, 0),
-			new Symbol((byte) 'e', 0, 0), new Symbol((byte) 0, 4, 3),
-			new Symbol((byte) 'f', 0, 0), new Symbol((byte) 'g', 0, 0),
-			new Symbol((byte) 'h', 0, 0), new Symbol((byte) 'i', 0, 0),
-			new Symbol((byte) 'j', 0, 0), };
+			new Symbol((byte) 'a'), new Symbol((byte) 'b'),
+			new Symbol((byte) 'c'), new Symbol((byte) 'd'),
+			new Symbol((byte) 'e'), new Symbol(4, 3), new Symbol((byte) 'f'),
+			new Symbol((byte) 'g'), new Symbol((byte) 'h'),
+			new Symbol((byte) 'i'), new Symbol((byte) 'j') };
 
 	private IMocksControl control;
 	private InputStream input;

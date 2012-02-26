@@ -71,15 +71,8 @@ class XmlCodec implements Codec {
 				output.write(String.format(REFERENCE_FORMAT,
 						symbol.getDistance(), symbol.getLength()).getBytes());
 			} else {
-				output.write(String.format(BYTE_FORMAT, symbol.getValue())
+				output.write(String.format(BYTE_FORMAT, symbol.getByte())
 						.getBytes());
-			}
-		}
-
-		@Override
-		public void write(Symbol[] symbols) throws IOException {
-			for (Symbol symbol : symbols) {
-				write(symbol);
 			}
 		}
 	}
@@ -112,46 +105,34 @@ class XmlCodec implements Codec {
 
 		@Override
 		public Symbol read() throws IOException {
-			return getNextSymbol();
-		}
-
-		@Override
-		public int read(Symbol[] symbols) throws IOException {
-			return read(symbols, 0, symbols.length);
-		}
-
-		@Override
-		public int read(Symbol[] symbols, int offset, int length)
-				throws IOException {
-			for (int i = 0; i < length; ++i) {
-				Symbol symbol = getNextSymbol();
-				if (symbol == null) {
-					return i == 0 ? -1 : i;
-				}
-				symbols[i + offset] = symbol;
-			}
-			return length;
-		}
-
-		private Symbol getNextSymbol() throws IOException {
 			if (currentSymbol == symbols.getLength()) {
 				return null;
 			}
 			Element symbol = (Element) symbols.item(currentSymbol++);
 			String tagName = symbol.getTagName();
 			if (BYTE_TAG.equals(tagName)) {
-				return new Symbol(
-						(byte) getNumericAttrib(symbol, VALUE_ATTRIB), 0, 0);
+				return new Symbol((byte) getNumericAttrib(symbol, VALUE_ATTRIB));
 			} else if (REFERENCE_TAG.equals(tagName)) {
-				return new Symbol((byte) 0, getNumericAttrib(symbol,
-						DISTANCE_ATTRIB), getNumericAttrib(symbol,
-						LENGTH_ATTRIB));
+				return new Symbol(getNumericAttrib(symbol, DISTANCE_ATTRIB),
+						getNumericAttrib(symbol, LENGTH_ATTRIB));
 			} else {
 				throw new IOException(String.format("Unexpected tag '%s'",
 						tagName));
 			}
 		}
 
+		/**
+		 * Interprets an attribute as an integer value.
+		 * 
+		 * @param element
+		 *            The element that contains the attribute.
+		 * @param attrName
+		 *            The attribute's name.
+		 * @return The attribute's integer value.
+		 * @throws IOException
+		 *             If the attribute was not defined or there was a problem
+		 *             parsing its value.
+		 */
 		private int getNumericAttrib(Element element, String attrName)
 				throws IOException {
 			if (!element.hasAttribute(attrName)) {

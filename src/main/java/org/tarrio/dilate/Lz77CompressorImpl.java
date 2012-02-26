@@ -11,6 +11,8 @@ import org.tarrio.dilate.LookupBuffer.Match;
 /**
  * Implementation of LZ77 that uses a specified codec for the compressed data
  * format.
+ * 
+ * @author Jacobo Tarrio
  */
 public class Lz77CompressorImpl implements Compressor {
 
@@ -51,21 +53,30 @@ public class Lz77CompressorImpl implements Compressor {
 			if (symbol.isReference()) {
 				buffer.repeatPastMatch(symbol.getDistance(), symbol.getLength());
 			} else {
-				buffer.write(symbol.getValue());
+				buffer.write(symbol.getByte());
 			}
 			symbol = decoder.read();
 		}
 	}
 
+	/**
+	 * Obtains the next symbol from the contents of a look-up buffer.
+	 * 
+	 * @param buffer
+	 *            The look-up buffer to read from.
+	 * @return The symbol that was read.
+	 * @throws IOException
+	 *             If there was any problem reading from the buffer.
+	 */
 	private Symbol readNextSymbol(LookupBuffer buffer) throws IOException {
 		byte[] buf = new byte[1];
 		Match match = buffer.findPastMatch();
 		if (match != null) {
 			buffer.skip(match.getLength());
-			return new Symbol((byte) 0, match.getDistance(), match.getLength());
+			return new Symbol(match.getDistance(), match.getLength());
 		} else {
 			int read = buffer.read(buf, 1);
-			return read == 1 ? new Symbol(buf[0], 0, 0) : null;
+			return read == 1 ? new Symbol(buf[0]) : null;
 		}
 	}
 }

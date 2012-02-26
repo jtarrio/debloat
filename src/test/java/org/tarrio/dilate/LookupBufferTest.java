@@ -9,15 +9,6 @@ import junit.framework.TestCase;
 
 public class LookupBufferTest extends TestCase {
 
-	public void testReadSingleBytes() throws Exception {
-		byte[] testData = "abcdef".getBytes();
-		LookupBuffer buffer = makeBuffer(testData);
-		for (int i = 0; i < testData.length; ++i) {
-			assertEquals(testData[i], buffer.read());
-		}
-		assertEquals(-1, buffer.read());
-	}
-	
 	public void testReadByteArrays() throws Exception {
 		byte[] testData = "abcdef".getBytes();
 		LookupBuffer buffer = makeBuffer(testData);
@@ -32,15 +23,16 @@ public class LookupBufferTest extends TestCase {
 	public void testReadSmallBuffer() throws Exception {
 		byte[] testData = "abcdef".getBytes();
 		LookupBuffer buffer = makeBuffer(testData, 3);
-		assertEquals('a', buffer.read());
 		byte[] readData = new byte[3];
+		assertEquals(1, buffer.read(readData, 1));
+		assertEquals('a', readData[0]);
 		assertEquals(3, buffer.read(readData, 3));
 		assertByteArrayEquals(testData, readData, 1, 0, 3);
-		assertEquals('e', buffer.read());
+		assertEquals(1, buffer.read(readData, 1));
+		assertEquals('e', readData[0]);
 		assertEquals(1, buffer.read(readData, 3));
 		assertByteArrayEquals(testData, readData, 5, 0, 1);
 		assertEquals(-1, buffer.read(readData, 1));
-		assertEquals(-1, buffer.read());
 	}
 
 	public void testFindPastMatch() throws Exception {

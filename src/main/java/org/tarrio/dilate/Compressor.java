@@ -8,7 +8,7 @@ import java.io.OutputStream;
  * An interface for compressors that read uncompressed/compressed data from a
  * stream and write compressed/uncompressed data into another stream.
  * 
- * @author Jacobo
+ * @author Jacobo Tarrio
  */
 public interface Compressor {
 

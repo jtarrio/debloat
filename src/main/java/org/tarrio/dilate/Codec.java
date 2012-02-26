@@ -6,10 +6,9 @@ import java.io.OutputStream;
 
 /**
  * Defines an API for classes that provide methods to read and write compressed
- * data.
+ * data to and from streams.
  * 
- * @author Jacobo
- * 
+ * @author Jacobo Tarrio
  */
 public interface Codec {
 
@@ -41,15 +40,22 @@ public interface Codec {
 	 * Defines an API for classes that write compressed data.
 	 */
 	public interface Encoder {
-		void write(Symbol symbol) throws IOException;
 
-		void write(Symbol[] symbols) throws IOException;
+		/**
+		 * Writes a symbol to the output stream.
+		 * 
+		 * @param symbol
+		 *            The symbol to write.
+		 * @throws IOException
+		 *             If there was any problem encoding or writing the data.
+		 */
+		void write(Symbol symbol) throws IOException;
 
 		/**
 		 * Finishes encoding the data.
 		 * 
 		 * @throws IOException
-		 *             If there was any problem writing the data.
+		 *             If there was any problem encoding or writing the data.
 		 */
 		void close() throws IOException;
 	}
@@ -58,10 +64,15 @@ public interface Codec {
 	 * Defines an API for classes that read compressed data.
 	 */
 	public interface Decoder {
+
+		/**
+		 * Reads a symbol from the input stream.
+		 * 
+		 * @return The symbol that was read, or null if the end of the stream
+		 *         was reached.
+		 * @throws IOException
+		 *             If there was any problem reading or decoding the data.
+		 */
 		Symbol read() throws IOException;
-
-		int read(Symbol[] symbols) throws IOException;
-
-		int read(Symbol[] symbols, int offset, int length) throws IOException;
 	}
 }
