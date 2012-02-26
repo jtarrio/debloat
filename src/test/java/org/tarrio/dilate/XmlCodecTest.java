@@ -2,10 +2,8 @@ package org.tarrio.dilate;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 
-import org.tarrio.dilate.Codec.BlockDecoder;
-import org.tarrio.dilate.Codec.BlockEncoder;
-import org.tarrio.dilate.Codec.Compression;
 import org.tarrio.dilate.Codec.Decoder;
 import org.tarrio.dilate.Codec.Encoder;
 
@@ -13,42 +11,23 @@ import junit.framework.TestCase;
 
 public class XmlCodecTest extends TestCase {
 
-	private static final Chunk[] CHUNKS = new Chunk[] {
-			new Chunk(0, "abcde".getBytes()),
-			new Chunk(4, "bc".getBytes()),
-			new Chunk(0, "fgh".getBytes()), new Chunk(0, "i".getBytes()),
-			new Chunk(0, "j".getBytes()) };
+	private static final Symbol[] SYMBOLS = new Symbol[] {
+			new Symbol((byte) 'a', 0, 0), new Symbol((byte) 'b', 0, 0),
+			new Symbol((byte) 'c', 0, 0), new Symbol((byte) 'd', 0, 0),
+			new Symbol((byte) 'e', 0, 0), new Symbol((byte) 0, 4, 2),
+			new Symbol((byte) 'f', 0, 0), new Symbol((byte) 'g', 0, 0),
+			new Symbol((byte) 'h', 0, 0), new Symbol((byte) 'i', 0, 0),
+			new Symbol((byte) 'j', 0, 0) };
 
-	private static final String UNCOMPRESSED_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<compressedData>\n  <block>\n"
-			+ "    <byte value=\"97\"/>\n    <byte value=\"98\"/>\n"
-			+ "    <byte value=\"99\"/>\n    <byte value=\"100\"/>\n"
-			+ "    <byte value=\"101\"/>\n    <byte value=\"98\"/>\n"
-			+ "    <byte value=\"99\"/>\n    <byte value=\"102\"/>\n"
-			+ "    <byte value=\"103\"/>\n    <byte value=\"104\"/>\n"
-			+ "  </block>\n  <block last=\"true\">\n"
-			+ "    <byte value=\"105\"/>\n    <byte value=\"106\"/>\n"
-			+ "  </block>\n</compressedData>\n";
 	private static final String COMPRESSED_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<compressedData>\n  <block>\n"
-			+ "    <byte value=\"97\"/>\n    <byte value=\"98\"/>\n"
-			+ "    <byte value=\"99\"/>\n    <byte value=\"100\"/>\n"
-			+ "    <byte value=\"101\"/>\n"
-			+ "    <reference distance=\"4\" length=\"2\"/>\n"
-			+ "    <byte value=\"102\"/>\n    <byte value=\"103\"/>\n"
-			+ "    <byte value=\"104\"/>\n  </block>\n"
-			+ "  <block last=\"true\">\n    <byte value=\"105\"/>\n"
-			+ "    <byte value=\"106\"/>\n  </block>\n" + "</compressedData>\n";
-	private static final String MORE_COMPRESSED_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<compressedData>\n  <block>\n"
-			+ "    <byte value=\"97\"/>\n    <byte value=\"98\"/>\n"
-			+ "    <byte value=\"99\"/>\n    <byte value=\"100\"/>\n"
-			+ "    <byte value=\"101\"/>\n"
-			+ "    <reference distance=\"4\" length=\"20\"/>\n"
-			+ "    <byte value=\"102\"/>\n    <byte value=\"103\"/>\n"
-			+ "    <byte value=\"104\"/>\n  </block>\n"
-			+ "  <block last=\"true\">\n    <byte value=\"105\"/>\n"
-			+ "    <byte value=\"106\"/>\n  </block>\n" + "</compressedData>\n";
+			+ "<compressedData>\n"
+			+ "  <byte value=\"97\"/>\n  <byte value=\"98\"/>\n"
+			+ "  <byte value=\"99\"/>\n  <byte value=\"100\"/>\n"
+			+ "  <byte value=\"101\"/>\n"
+			+ "  <reference distance=\"4\" length=\"2\"/>\n"
+			+ "  <byte value=\"102\"/>\n  <byte value=\"103\"/>\n"
+			+ "  <byte value=\"104\"/>\n  <byte value=\"105\"/>\n"
+			+ "  <byte value=\"106\"/>\n</compressedData>\n";
 	private XmlCodec codec;
 	private ByteArrayOutputStream output;
 	private Encoder encoder;
@@ -60,72 +39,54 @@ public class XmlCodecTest extends TestCase {
 		encoder = codec.getEncoder(output);
 	}
 
-	public void testEncodeWithCompression() throws Exception {
-		encoder.newBlock().addChunk(CHUNKS[0]).addChunk(CHUNKS[1])
-				.addChunk(CHUNKS[2]).endBlock().newBlock().addChunk(CHUNKS[3])
-				.addChunk(CHUNKS[4]).setLastBlock(true).endBlock().close();
+	public void testEncodeSingleBytes() throws Exception {
+		for (Symbol symbol : SYMBOLS) {
+			encoder.write(symbol);
+		}
+		encoder.close();
 
 		assertEquals(COMPRESSED_XML, output.toString());
 	}
-
-	public void testEncodeForCompressionNone() throws Exception {
-		encoder.newBlock().addChunk(CHUNKS[0]).addChunk(CHUNKS[1])
-				.addChunk(CHUNKS[2]).compress(Compression.NONE).endBlock()
-				.newBlock().addChunk(CHUNKS[3]).addChunk(CHUNKS[4])
-				.setLastBlock(true).endBlock().close();
-
-		assertEquals(UNCOMPRESSED_XML, output.toString());
+	
+	public void testEncodeByteArray() throws Exception {
+		encoder.write(Arrays.copyOfRange(SYMBOLS, 0, 7));
+		encoder.write(Arrays.copyOfRange(SYMBOLS, 7, 11));
+		encoder.close();
+		assertEquals(COMPRESSED_XML, output.toString());
 	}
 
-	public void testDecodeWithCompression() throws Exception {
-		StringBuilder sb = new StringBuilder();
+	public void testDecodeSingleBytes() throws Exception {
 		Decoder decoder = codec.getDecoder(new ByteArrayInputStream(
 				COMPRESSED_XML.getBytes()));
-		BlockDecoder block;
-		do {
-			block = decoder.nextBlock();
-			Chunk nextChunk = block.getNextChunk();
-			while (nextChunk != null) {
-				sb.append(new String(nextChunk.getBytes()));
-				nextChunk = block.getNextChunk();
-			}
-		} while (!block.isLastBlock());
-
-		assertEquals("abcdebcfghij", sb.toString());
+		Symbol[] syms = new Symbol[SYMBOLS.length];
+		for (int i = 0; i < syms.length; ++i) {
+			assertEquals(SYMBOLS[i], decoder.read());
+		}
+		assertEquals(null, decoder.read());
 	}
-	
-	public void testDecodeWithMoreCompression() throws Exception {
-		StringBuilder sb = new StringBuilder();
+
+	public void testDecodeByteArray() throws Exception {
 		Decoder decoder = codec.getDecoder(new ByteArrayInputStream(
-				MORE_COMPRESSED_XML.getBytes()));
-		BlockDecoder block;
-		do {
-			block = decoder.nextBlock();
-			Chunk nextChunk = block.getNextChunk();
-			while (nextChunk != null) {
-				sb.append(new String(nextChunk.getBytes()));
-				nextChunk = block.getNextChunk();
-			}
-		} while (!block.isLastBlock());
-
-		assertEquals("abcdebcdebcdebcdebcdebcdefghij", sb.toString());
+				COMPRESSED_XML.getBytes()));
+		Symbol[] syms = new Symbol[SYMBOLS.length];
+		assertEquals(7, decoder.read(syms, 0, 7));
+		assertEquals(4, decoder.read(syms, 7, 7));
+		assertEquals(SYMBOLS.length, syms.length);
+		for (int i = 0; i < syms.length; ++i) {
+			assertEquals(SYMBOLS[i], syms[i]);
+		}
+		assertEquals(-1, decoder.read(syms));
+		assertEquals(null, decoder.read());
 	}
-	
+
 	public void testRoundtripCompressedData() throws Exception {
 		Decoder decoder = codec.getDecoder(new ByteArrayInputStream(
 				COMPRESSED_XML.getBytes()));
-		BlockDecoder block;
-		do {
-			block = decoder.nextBlock();
-			BlockEncoder encodingBlock = encoder.newBlock().setLastBlock(
-					block.isLastBlock());
-			Chunk nextChunk = block.getNextChunk();
-			while (nextChunk != null) {
-				encodingBlock.addChunk(nextChunk);
-				nextChunk = block.getNextChunk();
-			}
-			encodingBlock.endBlock();
-		} while (!block.isLastBlock());
+		Symbol sym = decoder.read();
+		while (sym != null) {
+			encoder.write(sym);
+			sym = decoder.read();
+		}
 		encoder.close();
 
 		assertEquals(COMPRESSED_XML, output.toString());
