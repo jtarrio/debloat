@@ -35,6 +35,7 @@ public class LookupBuffer {
 	private int end;
 	private boolean eofReached;
 	private final PositionMap positionMap;
+	private int endOfMapped;
 
 	public LookupBuffer(InputStream inputStream) {
 		this(inputStream, 32768 * 3, 32768, 32768);
@@ -44,7 +45,6 @@ public class LookupBuffer {
 			int lookbackLength, int lookaheadLength) {
 		this.inputStream = inputStream;
 		this.outputStream = null;
-		this.positionMap = new PositionMap();
 		this.lookbackLength = lookbackLength;
 		this.lookaheadLength = lookaheadLength;
 		this.buffer = new byte[bufferLength];
@@ -52,6 +52,8 @@ public class LookupBuffer {
 		this.start = 0;
 		this.end = 0;
 		this.eofReached = false;
+		this.positionMap = new PositionMap();
+		this.endOfMapped = 0;
 	}
 
 	public LookupBuffer(OutputStream outputStream) {
@@ -62,11 +64,11 @@ public class LookupBuffer {
 			int lookbackLength, int lookaheadLength) {
 		this.outputStream = outputStream;
 		this.inputStream = null;
-		this.positionMap = null;
 		this.lookbackLength = lookbackLength;
 		this.lookaheadLength = lookaheadLength;
 		this.buffer = new byte[bufferLength];
 		this.position = 0;
+		this.positionMap = null;
 	}
 
 	public byte read() throws IOException {
@@ -102,14 +104,16 @@ public class LookupBuffer {
 		PositionMap.Position candidate = positionMap.findMatchingPositions();
 		while (candidate != null) {
 			int i = candidate.getValue() - start;
-			int j;
-			for (j = 0; i + j < end && position + j < end; ++j) {
-				if (buffer[i + j] != buffer[position + j]) {
-					break;
+			if (i < position) {
+				int j;
+				for (j = 0; i + j < end && position + j < end; ++j) {
+					if (buffer[i + j] != buffer[position + j]) {
+						break;
+					}
 				}
-			}
-			if (j >= 3 && (bestMatch == null || bestMatch.getLength() < j)) {
-				bestMatch = new Match(position - i, j);
+				if (j >= 3 && (bestMatch == null || bestMatch.getLength() < j)) {
+					bestMatch = new Match(position - i, j);
+				}
 			}
 			candidate = candidate.getNext();
 		}
@@ -136,6 +140,9 @@ public class LookupBuffer {
 	public void repeatPastMatch(int distance, int length) throws IOException {
 		makeRoom(length);
 		for (int i = 0; i < length; ++i) {
+			if (position < distance) {
+				System.out.println("foo");
+			}
 			write(buffer[position - distance]);
 		}
 	}
@@ -155,14 +162,15 @@ public class LookupBuffer {
 			position -= removeBytes;
 			start += removeBytes;
 			end -= removeBytes;
+			endOfMapped -= removeBytes;
 		}
-		if (end < buffer.length && !eofReached) {
+		if (end < buffer.length) {
 			int readBytes = inputStream.read(buffer, end, buffer.length - end);
 			if (readBytes == -1) {
 				eofReached = true;
 			} else {
 				end += readBytes;
-				positionMap.updatePositions(readBytes);
+				positionMap.updatePositions();
 			}
 		}
 	}
@@ -188,33 +196,45 @@ public class LookupBuffer {
 		private Position[] positions = new Position[BUCKETS];
 
 		public Position findMatchingPositions() {
-			return skipToPresent(positions[calculateHash(position)]);
+			int hash = calculateHash(position);
+			cleanBucket(hash);
+			return positions[hash];
 		}
 
-		private Position skipToPresent(Position current) {
-			while (current != null && current.getValue() >= start + position) {
-				current = current.getNext();
-			}
-			return current;
-		}
-
-		public void updatePositions(int readBytes) {
-			int startCount = Math.max(end - readBytes - 2, 0);
+		public void updatePositions() {
 			int endCount = end - 3;
-			for (int i = startCount; i < endCount; ++i) {
+			for (int i = Math.max(endOfMapped, 0); i < endCount; ++i) {
 				int hash = calculateHash(i);
 				positions[hash] = new Position(i + start, positions[hash]);
 			}
+			endOfMapped = endCount;
 		}
 
 		private int calculateHash(int pos) {
 			int hash = 0;
 			for (int i = pos; i < pos + 3; ++i) {
 				hash *= 257;
-				hash += buffer[i];
+				hash += (buffer[i] & 0xff);
 				hash %= BUCKETS;
 			}
 			return hash;
+		}
+
+		private void cleanBucket(int hash) {
+			Position current = skipOld(positions[hash]);
+			positions[hash] = current;
+			while (current != null) {
+				Position next = skipOld(current.getNext());
+				current.setNext(next);
+				current = next;
+			}
+		}
+
+		private Position skipOld(Position current) {
+			while (current != null && current.getValue() < position + start - lookbackLength) {
+				current = current.getNext();
+			}
+			return current;
 		}
 
 		private class Position {
@@ -233,10 +253,11 @@ public class LookupBuffer {
 			}
 
 			public Position getNext() {
-				if (next != null && next.getValue() < start) {
-					next = null;
-				}
-				return skipToPresent(next);
+				return next;
+			}
+			
+			public void setNext(Position next) {
+				this.next = next;
 			}
 		}
 	}

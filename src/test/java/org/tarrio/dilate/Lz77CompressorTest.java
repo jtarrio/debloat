@@ -10,7 +10,7 @@ import org.easymock.IMocksControl;
 
 import junit.framework.TestCase;
 
-public class DeflateTest extends TestCase {
+public class Lz77CompressorTest extends TestCase {
 
 	private static final Symbol[] SYMBOLS = new Symbol[] {
 			new Symbol((byte) 'a', 0, 0), new Symbol((byte) 'b', 0, 0),
@@ -19,6 +19,7 @@ public class DeflateTest extends TestCase {
 			new Symbol((byte) 'f', 0, 0), new Symbol((byte) 'g', 0, 0),
 			new Symbol((byte) 'h', 0, 0), new Symbol((byte) 'i', 0, 0),
 			new Symbol((byte) 'j', 0, 0), };
+
 	private IMocksControl control;
 	private InputStream input;
 	private OutputStream output;
@@ -34,7 +35,7 @@ public class DeflateTest extends TestCase {
 		codec = control.createMock(Codec.class);
 		encoder = control.createMock(Codec.Encoder.class);
 		decoder = control.createMock(Codec.Decoder.class);
-		compressor = new DeflateImpl(codec);
+		compressor = new Lz77CompressorImpl(codec);
 	}
 
 	public void testEncodesSymbols() throws Exception {

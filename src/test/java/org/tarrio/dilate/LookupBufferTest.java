@@ -94,6 +94,16 @@ public class LookupBufferTest extends TestCase {
 		assertNull(buffer.findPastMatch());
 	}
 	
+	public void testFindPastMatchOnlyOldMatches() throws Exception {
+		byte[] testData = "12345678903456".getBytes();
+		LookupBuffer buffer = makeBuffer(testData, 8, 4);
+		for (int i = 0; i < 10; ++i) {
+			assertNull(buffer.findPastMatch());
+			buffer.skip(1);
+		}
+		assertNull(buffer.findPastMatch());		
+	}
+	
 	public void testFindPastMatchRepeatedString() throws Exception {
 		byte[] testData = "121212121212".getBytes();
 		LookupBuffer buffer = makeBuffer(testData);

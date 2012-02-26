@@ -14,6 +14,6 @@ public final class CompressorFactory {
 	 * Returns a new instance of a {@link Compressor}.
 	 */
 	public static Compressor newInstance() {
-		return new DeflateImpl(new XmlCodec());
+		return new Lz77CompressorImpl(new XmlCodec());
 	}
 }

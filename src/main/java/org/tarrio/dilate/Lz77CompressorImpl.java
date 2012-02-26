@@ -12,7 +12,7 @@ import org.tarrio.dilate.LookupBuffer.Match;
  * Implementation of LZ77 that uses a specified codec for the compressed data
  * format.
  */
-public class DeflateImpl implements Compressor {
+public class Lz77CompressorImpl implements Compressor {
 
 	private final Codec codec;
 
@@ -24,7 +24,7 @@ public class DeflateImpl implements Compressor {
 	 * @param codec
 	 *            The codec to use.
 	 */
-	public DeflateImpl(Codec codec) {
+	public Lz77CompressorImpl(Codec codec) {
 		this.codec = codec;
 	}
 
