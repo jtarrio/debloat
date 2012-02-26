@@ -140,9 +140,6 @@ public class LookupBuffer {
 	public void repeatPastMatch(int distance, int length) throws IOException {
 		makeRoom(length);
 		for (int i = 0; i < length; ++i) {
-			if (position < distance) {
-				System.out.println("foo");
-			}
 			write(buffer[position - distance]);
 		}
 	}

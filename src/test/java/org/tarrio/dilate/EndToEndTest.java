@@ -47,7 +47,7 @@ public class EndToEndTest extends TestCase {
 
 	public void testCompressUncompressBinaryData() throws Exception {
 		Random random = new Random(1337L);
-		byte[] bytes = new byte[100000];
+		byte[] bytes = new byte[200000];
 		for (int i = 0; i < bytes.length; ++i) {
 			bytes[i] = (byte) random.nextInt(256);
 		}
