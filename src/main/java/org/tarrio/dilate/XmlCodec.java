@@ -71,7 +71,7 @@ class XmlCodec implements Codec {
 				output.write(String.format(REFERENCE_FORMAT,
 						symbol.getDistance(), symbol.getLength()).getBytes());
 			} else {
-				output.write(String.format(BYTE_FORMAT, symbol.getByte())
+				output.write(String.format(BYTE_FORMAT, symbol.getByte() & 0xff)
 						.getBytes());
 			}
 		}
