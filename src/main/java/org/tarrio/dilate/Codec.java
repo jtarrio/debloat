@@ -42,6 +42,14 @@ public interface Codec {
 	public interface Encoder {
 
 		/**
+		 * Sets the name of the algorithm that was used to compress the data.
+		 * 
+		 * @throws IOException
+		 *             If there was any problem writing data.
+		 */
+		void setAlgorithm(String algorithm) throws IOException;
+
+		/**
 		 * Writes a symbol to the output stream.
 		 * 
 		 * @param symbol
@@ -64,6 +72,14 @@ public interface Codec {
 	 * Defines an API for classes that read compressed data.
 	 */
 	public interface Decoder {
+
+		/**
+		 * Returns the name of the algorithm that was used to compress the data.
+		 * 
+		 * @throws IOException
+		 *             If there was any problem reading or decoding the data.
+		 */
+		String getAlgoritm() throws IOException;
 
 		/**
 		 * Reads a symbol from the input stream.

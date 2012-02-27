@@ -15,11 +15,12 @@ import org.xml.sax.SAXException;
 /**
  * A Codec that stores the compressed data in XML.
  * 
- * @author Jacobo
+ * @author Jacobo Tarrio
  */
 class XmlCodec implements Codec {
 
 	private static final String ROOT_TAG = "compressedData";
+	private static final String ALGORITHM_ATTRIB = "algorithm";
 	private static final String BYTE_TAG = "byte";
 	private static final String VALUE_ATTRIB = "value";
 	private static final String REFERENCE_TAG = "reference";
@@ -28,8 +29,7 @@ class XmlCodec implements Codec {
 
 	private static final byte[] XML_HEADER_1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			.getBytes();
-	private static final byte[] XML_HEADER_2 = ("<" + ROOT_TAG + ">\n")
-			.getBytes();
+	private static final String XML_HEADER_2_FORMAT = "<" + ROOT_TAG + " algorithm=\"%s\">\n";
 	private static final byte[] XML_FOOTER = ("</" + ROOT_TAG + ">\n")
 			.getBytes();
 	private static final String BYTE_FORMAT = "  <" + BYTE_TAG + " "
@@ -53,20 +53,29 @@ class XmlCodec implements Codec {
 	private class EncoderImpl implements Encoder {
 
 		private final OutputStream output;
+		private boolean wroteHeader;
 
 		public EncoderImpl(OutputStream output) throws IOException {
 			this.output = output;
+			this.wroteHeader = false;
 			output.write(XML_HEADER_1);
-			output.write(XML_HEADER_2);
 		}
-
+		
+		@Override
+		public void setAlgorithm(String algorithm) throws IOException {
+			output.write(String.format(XML_HEADER_2_FORMAT, algorithm).getBytes());
+			this.wroteHeader = true;
+		}
+		
 		@Override
 		public void close() throws IOException {
+			checkWroteHeader();
 			output.write(XML_FOOTER);
 		}
 
 		@Override
 		public void write(Symbol symbol) throws IOException {
+			checkWroteHeader();
 			if (symbol.isReference()) {
 				output.write(String.format(REFERENCE_FORMAT,
 						symbol.getDistance(), symbol.getLength()).getBytes());
@@ -75,12 +84,19 @@ class XmlCodec implements Codec {
 						.getBytes());
 			}
 		}
+
+		private void checkWroteHeader() {
+			if (!wroteHeader) {
+				throw new IllegalStateException("Must set the algorithm's name before encoding data");
+			}
+		}
 	}
 
 	/**
 	 * A class to decode compressed data stored in XML documents.
 	 */
 	private class DecoderImpl implements Decoder {
+		private String algorithm;
 		private NodeList symbols;
 		private int currentSymbol;
 
@@ -94,6 +110,7 @@ class XmlCodec implements Codec {
 							"XML document root is not %s but %s", ROOT_TAG,
 							root.getTagName()));
 				}
+				algorithm = root.getAttribute(ALGORITHM_ATTRIB);
 				symbols = root.getElementsByTagName("*");
 				currentSymbol = 0;
 			} catch (ParserConfigurationException e) {
@@ -103,6 +120,11 @@ class XmlCodec implements Codec {
 			}
 		}
 
+		@Override
+		public String getAlgoritm() throws IOException {
+			return algorithm;
+		}
+		
 		@Override
 		public Symbol read() throws IOException {
 			if (currentSymbol == symbols.getLength()) {

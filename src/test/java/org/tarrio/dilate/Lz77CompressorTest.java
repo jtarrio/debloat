@@ -41,6 +41,7 @@ public class Lz77CompressorTest extends TestCase {
 		input = new ByteArrayInputStream("abcdebcdfghij".getBytes());
 
 		EasyMock.expect(codec.getEncoder(output)).andReturn(encoder);
+		encoder.setAlgorithm(Lz77CompressorImpl.ALGORITHM);
 		for (Symbol symbol : SYMBOLS) {
 			encoder.write(symbol);
 		}
@@ -53,6 +54,7 @@ public class Lz77CompressorTest extends TestCase {
 
 	public void testDecodesSymbols() throws Exception {
 		EasyMock.expect(codec.getDecoder(input)).andReturn(decoder);
+		EasyMock.expect(decoder.getAlgoritm()).andReturn(Lz77CompressorImpl.ALGORITHM);
 		for (Symbol symbol : SYMBOLS) {
 			EasyMock.expect(decoder.read()).andReturn(symbol);
 		}

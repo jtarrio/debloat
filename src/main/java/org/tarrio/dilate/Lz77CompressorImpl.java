@@ -16,6 +16,13 @@ import org.tarrio.dilate.LookupBuffer.Match;
  */
 public class Lz77CompressorImpl implements Compressor {
 
+	/**
+	 * This algorithm's name.
+	 * 
+	 * Visible for testing.
+	 */
+	static final String ALGORITHM = "LZ77";
+
 	private final Codec codec;
 
 	/**
@@ -35,6 +42,7 @@ public class Lz77CompressorImpl implements Compressor {
 			throws IOException {
 		LookupBuffer buffer = new LookupBuffer(input);
 		Encoder encoder = codec.getEncoder(output);
+		encoder.setAlgorithm(ALGORITHM);
 		Symbol symbol = readNextSymbol(buffer);
 		while (symbol != null) {
 			encoder.write(symbol);
@@ -47,6 +55,12 @@ public class Lz77CompressorImpl implements Compressor {
 	public void decompress(InputStream input, OutputStream output)
 			throws IOException {
 		Decoder decoder = codec.getDecoder(input);
+		String algoritm = decoder.getAlgoritm();
+		if (!ALGORITHM.equals(algoritm)) {
+			throw new IllegalStateException(String.format(
+					"Tried to decompress %s data with a %s decompressor",
+					algoritm, ALGORITHM));
+		}
 		LookupBuffer buffer = new LookupBuffer(output);
 		Symbol symbol = decoder.read();
 		while (symbol != null) {

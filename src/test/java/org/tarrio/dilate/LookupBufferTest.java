@@ -2,6 +2,7 @@ package org.tarrio.dilate;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import org.tarrio.dilate.LookupBuffer.Match;
 
@@ -85,7 +86,7 @@ public class LookupBufferTest extends TestCase {
 		buffer.skip(match.getLength() + 1);
 		assertNull(buffer.findPastMatch());
 	}
-	
+
 	public void testFindPastMatchOnlyOldMatches() throws Exception {
 		byte[] testData = "12345678903456".getBytes();
 		LookupBuffer buffer = makeBuffer(testData, 8, 4);
@@ -93,9 +94,9 @@ public class LookupBufferTest extends TestCase {
 			assertNull(buffer.findPastMatch());
 			buffer.skip(1);
 		}
-		assertNull(buffer.findPastMatch());		
+		assertNull(buffer.findPastMatch());
 	}
-	
+
 	public void testFindPastMatchRepeatedString() throws Exception {
 		byte[] testData = "121212121212".getBytes();
 		LookupBuffer buffer = makeBuffer(testData);
@@ -108,7 +109,48 @@ public class LookupBufferTest extends TestCase {
 		assertEquals(2, match.getDistance());
 		assertEquals(10, match.getLength());
 	}
+
+	public void testFindPastMatchWithMaxDistanceAndLength() throws Exception {
+		Match match = getMatchForDistanceAndLength(32768, 258);
+		assertNotNull(match);
+		assertEquals(32768, match.getDistance());
+		assertEquals(258, match.getLength());
+	}
+
+	public void testFindPastMatchCantExceedMaxLength() throws Exception {
+		Match match = getMatchForDistanceAndLength(32768, 300);
+		assertNotNull(match);
+		assertEquals(32768, match.getDistance());
+		assertEquals(258, match.getLength());
+	}
+
+	public void testFindPastMatchCantExceedMaxDistance() throws Exception {
+		Match match = getMatchForDistanceAndLength(32769, 258);
+		assertNotNull(match);
+		// It finds the 00 00 01 at position 511 (FF 00 / 00 01 at position 510).
+		assertEquals(32258, match.getDistance());
+		assertEquals(3, match.getLength());
+	}
+
+	private Match getMatchForDistanceAndLength(int distance, int length)
+			throws IOException {
+		byte[] testData = new byte[distance + length];
+		fillWithNumbers(testData, 0, distance);
+		fillWithNumbers(testData, distance, length);
+		LookupBuffer buffer = makeBuffer(testData);
+		buffer.skip(distance);
+		Match match = buffer.findPastMatch();
+		return match;
+	}
 	
+	private void fillWithNumbers(byte[] buffer, int offset, int length) {
+		for (int i = 0; i < length; ++i) {
+			int counter = i / 2;
+			int bytePos = i % 2;
+			buffer[i + offset] = (byte) ((counter & (0xff << (8 * bytePos))) >> (8 * bytePos));
+		}
+	}
+
 	public void testWriteSingleBytes() throws Exception {
 		byte[] testData = "abcdef".getBytes();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -116,16 +158,18 @@ public class LookupBufferTest extends TestCase {
 		for (int i = 0; i < testData.length; ++i) {
 			buffer.write(testData[i]);
 		}
-		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0, testData.length);
+		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0,
+				testData.length);
 	}
-	
+
 	public void testWriteByteArrays() throws Exception {
 		byte[] testData = "abcdef".getBytes();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		LookupBuffer buffer = new LookupBuffer(stream);
 		buffer.write(testData, 0, 4);
 		buffer.write(testData, 4, 2);
-		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0, testData.length);
+		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0,
+				testData.length);
 	}
 
 	public void testWriteSmallBuffer() throws Exception {
@@ -136,9 +180,10 @@ public class LookupBufferTest extends TestCase {
 		buffer.write(testData, 1, 3);
 		buffer.write(testData[4]);
 		buffer.write(testData, 5, 1);
-		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0, testData.length);
+		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0,
+				testData.length);
 	}
-	
+
 	public void testRepeatPastMatch() throws Exception {
 		byte[] testData = "12345678903456a34567b3456".getBytes();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -149,7 +194,8 @@ public class LookupBufferTest extends TestCase {
 		buffer.repeatPastMatch(13, 5);
 		buffer.write((byte) 'b');
 		buffer.repeatPastMatch(6, 4);
-		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0, testData.length);
+		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0,
+				testData.length);
 	}
 
 	public void testRepeatPastMatchRepeatedString() throws Exception {
@@ -158,23 +204,27 @@ public class LookupBufferTest extends TestCase {
 		LookupBuffer buffer = new LookupBuffer(stream);
 		buffer.write("12".getBytes());
 		buffer.repeatPastMatch(2, 10);
-		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0, testData.length);
+		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0,
+				testData.length);
 	}
 
 	private LookupBuffer makeBuffer(byte[] testData) {
 		return new LookupBuffer(new ByteArrayInputStream(testData));
 	}
-	
+
 	private LookupBuffer makeBuffer(byte[] testData, int bufferLength) {
-		return new LookupBuffer(new ByteArrayInputStream(testData), bufferLength, 0, bufferLength);
+		return new LookupBuffer(new ByteArrayInputStream(testData),
+				bufferLength, 0, bufferLength);
 	}
 
-	private LookupBuffer makeBuffer(byte[] testData, int bufferLength, int lookupLength) {
-		return new LookupBuffer(new ByteArrayInputStream(testData), bufferLength, lookupLength, lookupLength);
+	private LookupBuffer makeBuffer(byte[] testData, int bufferLength,
+			int lookupLength) {
+		return new LookupBuffer(new ByteArrayInputStream(testData),
+				bufferLength, lookupLength, lookupLength);
 	}
 
-
-	private void assertByteArrayEquals(byte[] expected, byte[] actual, int expectedOffset, int actualOffset, int length) {
+	private void assertByteArrayEquals(byte[] expected, byte[] actual,
+			int expectedOffset, int actualOffset, int length) {
 		for (int i = 0; i < length; ++i) {
 			assertEquals(expected[expectedOffset + i], actual[actualOffset + i]);
 		}

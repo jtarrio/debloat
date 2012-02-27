@@ -10,6 +10,8 @@ import junit.framework.TestCase;
 
 public class XmlCodecTest extends TestCase {
 
+	private static final String ALGORITHM = "testAlgo";
+
 	private static final Symbol[] SYMBOLS = new Symbol[] {
 			new Symbol((byte) 'a'), new Symbol((byte) 'b'),
 			new Symbol((byte) 'c'), new Symbol((byte) 'd'),
@@ -18,7 +20,7 @@ public class XmlCodecTest extends TestCase {
 			new Symbol((byte) 'i'), new Symbol((byte) 'j') };
 
 	private static final String COMPRESSED_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<compressedData>\n"
+			+ "<compressedData algorithm=\"testAlgo\">\n"
 			+ "  <byte value=\"97\"/>\n  <byte value=\"98\"/>\n"
 			+ "  <byte value=\"99\"/>\n  <byte value=\"100\"/>\n"
 			+ "  <byte value=\"101\"/>\n"
@@ -38,6 +40,7 @@ public class XmlCodecTest extends TestCase {
 	}
 
 	public void testEncodeSingleBytes() throws Exception {
+		encoder.setAlgorithm(ALGORITHM);
 		for (Symbol symbol : SYMBOLS) {
 			encoder.write(symbol);
 		}
@@ -49,6 +52,7 @@ public class XmlCodecTest extends TestCase {
 	public void testDecodeSingleBytes() throws Exception {
 		Decoder decoder = codec.getDecoder(new ByteArrayInputStream(
 				COMPRESSED_XML.getBytes()));
+		assertEquals(ALGORITHM, decoder.getAlgoritm());
 		Symbol[] syms = new Symbol[SYMBOLS.length];
 		for (int i = 0; i < syms.length; ++i) {
 			assertEquals(SYMBOLS[i], decoder.read());
@@ -59,6 +63,7 @@ public class XmlCodecTest extends TestCase {
 	public void testRoundtripCompressedData() throws Exception {
 		Decoder decoder = codec.getDecoder(new ByteArrayInputStream(
 				COMPRESSED_XML.getBytes()));
+		encoder.setAlgorithm(decoder.getAlgoritm());
 		Symbol sym = decoder.read();
 		while (sym != null) {
 			encoder.write(sym);
