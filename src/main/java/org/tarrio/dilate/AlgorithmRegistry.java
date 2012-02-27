@@ -22,8 +22,7 @@ public class AlgorithmRegistry {
 
 	AlgorithmRegistry readConfiguration() {
 		try {
-			registerFromXml(AlgorithmRegistryTest.class
-					.getResourceAsStream(XML_CONFIG_FILE));
+			registerFromXml(getClass().getResourceAsStream(XML_CONFIG_FILE));
 			return this;
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
