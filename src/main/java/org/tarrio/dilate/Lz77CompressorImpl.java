@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.tarrio.dilate.Codec.Decoder;
-import org.tarrio.dilate.Codec.Encoder;
 import org.tarrio.dilate.LookupBuffer.Match;
 
 /**
@@ -23,25 +21,10 @@ public class Lz77CompressorImpl implements Compressor {
 	 */
 	static final String ALGORITHM = "LZ77";
 
-	private final Codec codec;
-
-	/**
-	 * Creates a compressor that reads and writes compressed data using the
-	 * given codec and tries to read the data to compress in blocks of the
-	 * default target block size.
-	 * 
-	 * @param codec
-	 *            The codec to use.
-	 */
-	public Lz77CompressorImpl(Codec codec) {
-		this.codec = codec;
-	}
-
 	@Override
-	public void compress(InputStream input, OutputStream output)
+	public void compress(InputStream input, Codec.Encoder encoder)
 			throws IOException {
 		LookupBuffer buffer = new LookupBuffer(input);
-		Encoder encoder = codec.getEncoder(output);
 		encoder.setAlgorithm(ALGORITHM);
 		Symbol symbol = readNextSymbol(buffer);
 		while (symbol != null) {
@@ -52,9 +35,8 @@ public class Lz77CompressorImpl implements Compressor {
 	}
 
 	@Override
-	public void decompress(InputStream input, OutputStream output)
+	public void decompress(Codec.Decoder decoder, OutputStream output)
 			throws IOException {
-		Decoder decoder = codec.getDecoder(input);
 		String algoritm = decoder.getAlgoritm();
 		if (!ALGORITHM.equals(algoritm)) {
 			throw new IllegalStateException(String.format(

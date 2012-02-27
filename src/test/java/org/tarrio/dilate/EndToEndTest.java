@@ -32,15 +32,15 @@ public class EndToEndTest extends TestCase {
 			+ " en la narración dél no se salga un punto de la verdad.";
 
 	public void testCompressUncompressText() throws Exception {
-		Compressor compressor = CompressorFactory.newInstance();
+		XmlCodec codec = new XmlCodec();
+		Compressor compressor = AlgorithmRegistry.getInstance().get("LZ77");
 		ByteArrayOutputStream compressedStream = new ByteArrayOutputStream();
 		compressor.compress(new ByteArrayInputStream(TEST_DATA.getBytes()),
-				compressedStream);
+				codec.getEncoder(compressedStream));
 
 		ByteArrayOutputStream uncompressedStream = new ByteArrayOutputStream();
-		compressor.decompress(
-				new ByteArrayInputStream(compressedStream.toByteArray()),
-				uncompressedStream);
+		compressor.decompress(codec.getDecoder(new ByteArrayInputStream(
+				compressedStream.toByteArray())), uncompressedStream);
 
 		assertEquals(TEST_DATA, uncompressedStream.toString());
 	}
@@ -52,15 +52,15 @@ public class EndToEndTest extends TestCase {
 			bytes[i] = (byte) random.nextInt(256);
 		}
 
-		Compressor compressor = CompressorFactory.newInstance();
+		XmlCodec codec = new XmlCodec();
+		Compressor compressor = AlgorithmRegistry.getInstance().get("LZ77");
 		ByteArrayOutputStream compressedStream = new ByteArrayOutputStream();
 		compressor.compress(new ByteArrayInputStream(bytes),
-				compressedStream);
-		
+				codec.getEncoder(compressedStream));
+
 		ByteArrayOutputStream uncompressedStream = new ByteArrayOutputStream();
-		compressor.decompress(
-				new ByteArrayInputStream(compressedStream.toByteArray()),
-				uncompressedStream);
+		compressor.decompress(codec.getDecoder(new ByteArrayInputStream(
+				compressedStream.toByteArray())), uncompressedStream);
 
 		assertTrue(Arrays.equals(bytes, uncompressedStream.toByteArray()));
 	}

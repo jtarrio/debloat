@@ -34,7 +34,7 @@ public class Lz77CompressorTest extends TestCase {
 		codec = control.createMock(Codec.class);
 		encoder = control.createMock(Codec.Encoder.class);
 		decoder = control.createMock(Codec.Decoder.class);
-		compressor = new Lz77CompressorImpl(codec);
+		compressor = new Lz77CompressorImpl();
 	}
 
 	public void testEncodesSymbols() throws Exception {
@@ -48,7 +48,7 @@ public class Lz77CompressorTest extends TestCase {
 		encoder.close();
 
 		control.replay();
-		compressor.compress(input, output);
+		compressor.compress(input, codec.getEncoder(output));
 		control.verify();
 	}
 
@@ -61,7 +61,7 @@ public class Lz77CompressorTest extends TestCase {
 		EasyMock.expect(decoder.read()).andReturn(null);
 
 		control.replay();
-		compressor.decompress(input, output);
+		compressor.decompress(codec.getDecoder(input), output);
 		control.verify();
 		assertEquals("abcdebcdfghij", output.toString());
 	}

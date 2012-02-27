@@ -18,28 +18,28 @@ public interface Compressor {
 	 * 
 	 * @param input
 	 *            The stream to read uncompressed data from.
-	 * @param output
-	 *            The stream to write compressed data into.
+	 * @param outputEncoder
+	 *            The encoder to write compressed data to.
 	 * @throws IOException
 	 *             If there was a problem reading from the input stream or
 	 *             writing into the output stream.
 	 */
-	public abstract void compress(InputStream input, OutputStream output)
+	public abstract void compress(InputStream input, Codec.Encoder outputEncoder)
 			throws IOException;
 
 	/**
 	 * Reads compressed data from an input stream and writes the uncompressed
 	 * version of it to the output stream.
 	 * 
-	 * @param input
-	 *            The stream to read compressed data from.
+	 * @param inputDecoder
+	 *            The decoder to read compressed data from.
 	 * @param output
 	 *            The stream to write uncompressed data into.
 	 * @throws IOException
 	 *             If there was a problem reading from the input stream or
 	 *             writing into the output stream.
 	 */
-	public abstract void decompress(InputStream input, OutputStream output)
+	public abstract void decompress(Codec.Decoder inputDecoder, OutputStream output)
 			throws IOException;
 
 }

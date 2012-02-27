@@ -8,6 +8,7 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
 		//$JUnit-BEGIN$
+		suite.addTestSuite(AlgorithmRegistryTest.class);
 		suite.addTestSuite(EndToEndTest.class);
 		suite.addTestSuite(LookupBufferTest.class);
 		suite.addTestSuite(Lz77CompressorTest.class);
