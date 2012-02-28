@@ -24,7 +24,7 @@ public class Lz77CompressorImpl implements Compressor {
 	@Override
 	public void compress(InputStream input, Codec.Encoder encoder)
 			throws IOException {
-		LookupBuffer buffer = new LookupBuffer(input);
+		LookupBuffer buffer = new LookupBufferImpl(input);
 		encoder.setAlgorithm(ALGORITHM);
 		Symbol symbol = readNextSymbol(buffer);
 		while (symbol != null) {
@@ -43,7 +43,7 @@ public class Lz77CompressorImpl implements Compressor {
 					"Tried to decompress %s data with a %s decompressor",
 					algoritm, ALGORITHM));
 		}
-		LookupBuffer buffer = new LookupBuffer(output);
+		LookupBuffer buffer = new LookupBufferImpl(output);
 		Symbol symbol = decoder.read();
 		while (symbol != null) {
 			if (symbol.isReference()) {
