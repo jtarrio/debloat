@@ -154,7 +154,7 @@ public class LookupBufferTest extends TestCase {
 	public void testWriteSingleBytes() throws Exception {
 		byte[] testData = "abcdef".getBytes();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		LookupBuffer buffer = new LookupBufferImpl(stream);
+		LookupBuffer buffer = makeBuffer(stream);
 		for (int i = 0; i < testData.length; ++i) {
 			buffer.write(testData[i]);
 		}
@@ -165,7 +165,7 @@ public class LookupBufferTest extends TestCase {
 	public void testWriteByteArrays() throws Exception {
 		byte[] testData = "abcdef".getBytes();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		LookupBuffer buffer = new LookupBufferImpl(stream);
+		LookupBuffer buffer = makeBuffer(stream);
 		buffer.write(testData, 0, 4);
 		buffer.write(testData, 4, 2);
 		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0,
@@ -175,7 +175,7 @@ public class LookupBufferTest extends TestCase {
 	public void testWriteSmallBuffer() throws Exception {
 		byte[] testData = "abcdef".getBytes();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		LookupBuffer buffer = new LookupBufferImpl(stream, 3, 0, 3);
+		LookupBuffer buffer = makeBuffer(stream, 3, 0, 3);
 		buffer.write(testData[0]);
 		buffer.write(testData, 1, 3);
 		buffer.write(testData[4]);
@@ -187,7 +187,7 @@ public class LookupBufferTest extends TestCase {
 	public void testRepeatPastMatch() throws Exception {
 		byte[] testData = "12345678903456a34567b3456".getBytes();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		LookupBuffer buffer = new LookupBufferImpl(stream);
+		LookupBuffer buffer = makeBuffer(stream);
 		buffer.write(testData, 0, 10);
 		buffer.repeatPastMatch(8, 4);
 		buffer.write((byte) 'a');
@@ -201,26 +201,56 @@ public class LookupBufferTest extends TestCase {
 	public void testRepeatPastMatchRepeatedString() throws Exception {
 		byte[] testData = "121212121212".getBytes();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		LookupBuffer buffer = new LookupBufferImpl(stream);
+		LookupBuffer buffer = makeBuffer(stream);
 		buffer.write("12".getBytes());
 		buffer.repeatPastMatch(2, 10);
 		assertByteArrayEquals(testData, stream.toByteArray(), 0, 0,
 				testData.length);
 	}
 
+//	private LookupBuffer makeBuffer(byte[] testData) {
+//		return new LookupBufferImpl(new ByteArrayInputStream(testData));
+//	}
+//
+//	private LookupBuffer makeBuffer(byte[] testData, int bufferLength) {
+//		return new LookupBufferImpl(new ByteArrayInputStream(testData),
+//				bufferLength, 0, bufferLength);
+//	}
+//
+//	private LookupBuffer makeBuffer(byte[] testData, int bufferLength,
+//			int lookupLength) {
+//		return new LookupBufferImpl(new ByteArrayInputStream(testData),
+//				bufferLength, lookupLength, lookupLength);
+//	}
+//
+//	private LookupBuffer makeBuffer(ByteArrayOutputStream stream) {
+//		return new LookupBufferImpl(stream);
+//	}
+//	
+//	private LookupBuffer makeBuffer(ByteArrayOutputStream stream, int bufferLength, int maxDistance, int maxLength) {
+//		return new LookupBufferImpl(stream, bufferLength, maxDistance, maxLength);
+//	}
+
 	private LookupBuffer makeBuffer(byte[] testData) {
-		return new LookupBufferImpl(new ByteArrayInputStream(testData));
+		return new RingBuffer(new ByteArrayInputStream(testData));
 	}
 
 	private LookupBuffer makeBuffer(byte[] testData, int bufferLength) {
-		return new LookupBufferImpl(new ByteArrayInputStream(testData),
-				bufferLength, 0, bufferLength);
+		return new RingBuffer(new ByteArrayInputStream(testData), 0, bufferLength);
 	}
 
 	private LookupBuffer makeBuffer(byte[] testData, int bufferLength,
 			int lookupLength) {
-		return new LookupBufferImpl(new ByteArrayInputStream(testData),
-				bufferLength, lookupLength, lookupLength);
+		return new RingBuffer(new ByteArrayInputStream(testData), lookupLength, bufferLength);
+	}
+
+	private LookupBuffer makeBuffer(ByteArrayOutputStream stream) {
+		return new RingBuffer(stream);
+	}
+
+	private LookupBuffer makeBuffer(ByteArrayOutputStream stream,
+			int bufferLength, int maxDistance, int maxLength) {
+		return new RingBuffer(stream, maxDistance, maxLength);
 	}
 
 	private void assertByteArrayEquals(byte[] expected, byte[] actual,
