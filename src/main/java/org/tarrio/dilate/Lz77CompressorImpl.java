@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.tarrio.dilate.LookupBuffer.Match;
+import org.tarrio.dilate.RingBuffer.Match;
 
 /**
  * Implementation of LZ77 that uses a specified codec for the compressed data
@@ -24,7 +24,7 @@ public class Lz77CompressorImpl implements Compressor {
 	@Override
 	public void compress(InputStream input, Codec.Encoder encoder)
 			throws IOException {
-		LookupBuffer buffer = new RingBuffer(input);
+		RingBuffer buffer = new RingBufferImpl(input);
 		encoder.setAlgorithm(ALGORITHM);
 		Symbol symbol = readNextSymbol(buffer);
 		while (symbol != null) {
@@ -43,7 +43,7 @@ public class Lz77CompressorImpl implements Compressor {
 					"Tried to decompress %s data with a %s decompressor",
 					algoritm, ALGORITHM));
 		}
-		LookupBuffer buffer = new RingBuffer(output);
+		RingBuffer buffer = new RingBufferImpl(output);
 		Symbol symbol = decoder.read();
 		while (symbol != null) {
 			if (symbol.isReference()) {
@@ -64,7 +64,7 @@ public class Lz77CompressorImpl implements Compressor {
 	 * @throws IOException
 	 *             If there was any problem reading from the buffer.
 	 */
-	private Symbol readNextSymbol(LookupBuffer buffer) throws IOException {
+	private Symbol readNextSymbol(RingBuffer buffer) throws IOException {
 		byte[] buf = new byte[1];
 		Match match = buffer.findPastMatch();
 		if (match != null) {

@@ -10,7 +10,7 @@ public class AllTests {
 		//$JUnit-BEGIN$
 		suite.addTestSuite(AlgorithmRegistryTest.class);
 		suite.addTestSuite(EndToEndTest.class);
-		suite.addTestSuite(LookupBufferTest.class);
+		suite.addTestSuite(RingBufferTest.class);
 		suite.addTestSuite(Lz77CompressorTest.class);
 		suite.addTestSuite(XmlCodecTest.class);
 		//$JUnit-END$
