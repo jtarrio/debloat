@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * A ring buffer implementation that keeps enough space for as many bytes for
- * the maximum match distance plus the maximum length plus one extra byte.
+ * A circular buffer implementation that keeps enough space for as many bytes
+ * for the maximum match distance plus the maximum length plus one extra byte.
  * 
  * That extra byte serves to be able to distinguish between completely empty and
  * completely full buffers.

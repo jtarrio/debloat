@@ -10,7 +10,7 @@ import java.io.OutputStream;
  * 
  * @author Jacobo Tarrio
  */
-public interface Compressor {
+public interface CompressionAlgorithm {
 
 	/**
 	 * Reads uncompressed data from an input stream and writes a compressed

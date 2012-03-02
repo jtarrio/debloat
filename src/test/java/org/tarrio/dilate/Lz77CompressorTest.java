@@ -25,7 +25,7 @@ public class Lz77CompressorTest extends TestCase {
 	private Codec codec;
 	private Codec.Encoder encoder;
 	private Codec.Decoder decoder;
-	private Compressor compressor;
+	private CompressionAlgorithm compressor;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -34,14 +34,14 @@ public class Lz77CompressorTest extends TestCase {
 		codec = control.createMock(Codec.class);
 		encoder = control.createMock(Codec.Encoder.class);
 		decoder = control.createMock(Codec.Decoder.class);
-		compressor = new Lz77CompressorImpl();
+		compressor = new Lz77();
 	}
 
 	public void testEncodesSymbols() throws Exception {
 		input = new ByteArrayInputStream("abcdebcdfghij".getBytes());
 
 		EasyMock.expect(codec.getEncoder(output)).andReturn(encoder);
-		encoder.setAlgorithm(Lz77CompressorImpl.ALGORITHM);
+		encoder.setAlgorithm(Lz77.ALGORITHM);
 		for (Symbol symbol : SYMBOLS) {
 			encoder.write(symbol);
 		}
@@ -54,7 +54,7 @@ public class Lz77CompressorTest extends TestCase {
 
 	public void testDecodesSymbols() throws Exception {
 		EasyMock.expect(codec.getDecoder(input)).andReturn(decoder);
-		EasyMock.expect(decoder.getAlgoritm()).andReturn(Lz77CompressorImpl.ALGORITHM);
+		EasyMock.expect(decoder.getAlgoritm()).andReturn(Lz77.ALGORITHM);
 		for (Symbol symbol : SYMBOLS) {
 			EasyMock.expect(decoder.read()).andReturn(symbol);
 		}

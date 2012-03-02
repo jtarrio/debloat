@@ -7,7 +7,7 @@ import java.io.OutputStream;
 
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
-import org.tarrio.dilate.AlgorithmRegistry.CompressorProvider;
+import org.tarrio.dilate.CompressionAlgorithmRegistry.CompressionAlgorithmProvider;
 import org.tarrio.dilate.Codec.Decoder;
 import org.tarrio.dilate.Codec.Encoder;
 
@@ -17,18 +17,18 @@ public class AlgorithmRegistryTest extends TestCase {
 
 	private static final String TEST_ALGORITHM = "test-algorithm";
 	private static final String BOGUS_ALGORITHM = "bogus-algorithm";
-	private AlgorithmRegistry registry;
+	private CompressionAlgorithmRegistry registry;
 	private IMocksControl control;
-	private CompressorProvider provider;
-	private Compressor compressor;
+	private CompressionAlgorithmProvider provider;
+	private CompressionAlgorithm compressor;
 
 	@Override
 	protected void setUp() throws Exception {
 		control = EasyMock.createControl();
-		registry = new AlgorithmRegistry();
+		registry = new CompressionAlgorithmRegistry();
 		provider = control
-				.createMock(AlgorithmRegistry.CompressorProvider.class);
-		compressor = control.createMock(Compressor.class);
+				.createMock(CompressionAlgorithmRegistry.CompressionAlgorithmProvider.class);
+		compressor = control.createMock(CompressionAlgorithm.class);
 	}
 
 	public void testGetReturnsNullForUnknownAlgorithm() throws Exception {
@@ -57,7 +57,7 @@ public class AlgorithmRegistryTest extends TestCase {
 			throws Exception {
 		control.replay();
 		registry.register(TEST_ALGORITHM, MockCompressor.class);
-		Compressor returnedCompressor = registry.get(TEST_ALGORITHM);
+		CompressionAlgorithm returnedCompressor = registry.get(TEST_ALGORITHM);
 		assertTrue(returnedCompressor instanceof MockCompressor);
 		assertTrue(((MockCompressor) returnedCompressor).usedDefault);
 		control.verify();
@@ -69,7 +69,7 @@ public class AlgorithmRegistryTest extends TestCase {
 						.getBytes());
 		registry.registerFromProperties(propertiesStream);
 		control.replay();
-		Compressor returnedCompressor = registry.get(TEST_ALGORITHM);
+		CompressionAlgorithm returnedCompressor = registry.get(TEST_ALGORITHM);
 		assertTrue(returnedCompressor instanceof MockCompressor);
 		assertTrue(((MockCompressor) returnedCompressor).usedDefault);
 		control.verify();
@@ -86,13 +86,13 @@ public class AlgorithmRegistryTest extends TestCase {
 						MockCompressor.class.getName()).getBytes());
 		registry.registerFromXml(xmlStream);
 		control.replay();
-		Compressor returnedCompressor = registry.get(TEST_ALGORITHM);
+		CompressionAlgorithm returnedCompressor = registry.get(TEST_ALGORITHM);
 		assertTrue(returnedCompressor instanceof MockCompressor);
 		assertTrue(((MockCompressor) returnedCompressor).usedDefault);
 		control.verify();
 	}
 
-	private static class MockCompressor implements Compressor {
+	private static class MockCompressor implements CompressionAlgorithm {
 		public boolean usedDefault = false;
 
 		@SuppressWarnings("unused")

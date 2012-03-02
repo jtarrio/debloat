@@ -7,12 +7,11 @@ import java.io.OutputStream;
 import org.tarrio.dilate.RingBuffer.Match;
 
 /**
- * Implementation of LZ77 that uses a specified codec for the compressed data
- * format.
+ * Implementation of LZ77.
  * 
  * @author Jacobo Tarrio
  */
-public class Lz77CompressorImpl implements Compressor {
+public class Lz77 implements CompressionAlgorithm {
 
 	/**
 	 * This algorithm's name.

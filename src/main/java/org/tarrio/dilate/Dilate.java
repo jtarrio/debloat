@@ -39,12 +39,12 @@ public class Dilate {
 	private void run() throws IOException {
 		Codec codec = CodecFactory.getCodec();
 		if (operation == Operation.COMPRESS) {
-			Compressor compressor = AlgorithmRegistry.getInstance().get(
+			CompressionAlgorithm compressor = CompressionAlgorithmRegistry.getInstance().get(
 					algorithm);
 			compressor.compress(inputStream, codec.getEncoder(outputStream));
 		} else {
 			Decoder decoder = codec.getDecoder(inputStream);
-			Compressor compressor = AlgorithmRegistry.getInstance()
+			CompressionAlgorithm compressor = CompressionAlgorithmRegistry.getInstance()
 					.get(decoder);
 			compressor.decompress(decoder, outputStream);
 		}
@@ -64,7 +64,7 @@ public class Dilate {
 		System.err
 				.println("  -a=<algorithm> : Select algorithm (default: LZ77)");
 		System.err.println("        Available algorithms:");
-		for (String algorithm : AlgorithmRegistry.getInstance().getAlgorithms()) {
+		for (String algorithm : CompressionAlgorithmRegistry.getInstance().getAlgorithms()) {
 			System.err.println("          - " + algorithm);
 		}
 	}
