@@ -10,7 +10,7 @@ import org.easymock.IMocksControl;
 
 import junit.framework.TestCase;
 
-public class Lz77CompressorTest extends TestCase {
+public class Lz77Test extends TestCase {
 
 	private static final Symbol[] SYMBOLS = new Symbol[] {
 			new Symbol((byte) 'a'), new Symbol((byte) 'b'),

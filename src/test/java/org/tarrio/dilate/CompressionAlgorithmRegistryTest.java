@@ -13,7 +13,7 @@ import org.tarrio.dilate.Codec.Encoder;
 
 import junit.framework.TestCase;
 
-public class AlgorithmRegistryTest extends TestCase {
+public class CompressionAlgorithmRegistryTest extends TestCase {
 
 	private static final String TEST_ALGORITHM = "test-algorithm";
 	private static final String BOGUS_ALGORITHM = "bogus-algorithm";
