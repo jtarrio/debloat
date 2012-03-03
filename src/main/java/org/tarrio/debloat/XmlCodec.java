@@ -26,6 +26,9 @@ class XmlCodec implements Codec {
 	private static final String REFERENCE_TAG = "reference";
 	private static final String DISTANCE_ATTRIB = "distance";
 	private static final String LENGTH_ATTRIB = "length";
+	private static final String DICTIONARY_TAG = "dictionary";
+	private static final String ENTRY_ATTRIB = "entry";
+	private static final String RESET_TAG = "reset";
 
 	private static final byte[] XML_HEADER_1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			.getBytes();
@@ -36,6 +39,9 @@ class XmlCodec implements Codec {
 			+ VALUE_ATTRIB + "=\"%d\"/>\n";
 	private static final String REFERENCE_FORMAT = "  <" + REFERENCE_TAG + " "
 			+ DISTANCE_ATTRIB + "=\"%d\" " + LENGTH_ATTRIB + "=\"%d\"/>\n";
+	private static final String DICTIONARY_FORMAT = "  <" + DICTIONARY_TAG + " "
+			+ ENTRY_ATTRIB + "=\"%d\"/>\n";
+	private static final byte[] RESET = ("  <" + RESET_TAG + "/>\n").getBytes();
 
 	@Override
 	public Encoder getEncoder(OutputStream output) throws IOException {
@@ -76,12 +82,22 @@ class XmlCodec implements Codec {
 		@Override
 		public void write(Symbol symbol) throws IOException {
 			checkWroteHeader();
-			if (symbol.isReference()) {
-				output.write(String.format(REFERENCE_FORMAT,
-						symbol.getDistance(), symbol.getLength()).getBytes());
-			} else {
-				output.write(String.format(BYTE_FORMAT, symbol.getByte() & 0xff)
+			if (symbol instanceof Symbol.Byte) {
+				Symbol.Byte theByte = (Symbol.Byte) symbol; 
+				output.write(String.format(BYTE_FORMAT, theByte.getByteValue() & 0xff)
 						.getBytes());
+			} else if (symbol instanceof Symbol.BackRef) {
+				Symbol.BackRef backRef = (Symbol.BackRef) symbol;
+				output.write(String.format(REFERENCE_FORMAT,
+						backRef.getDistance(), backRef.getLength()).getBytes());
+			} else if (symbol instanceof Symbol.DictionaryRef){
+				Symbol.DictionaryRef dicRef = (Symbol.DictionaryRef) symbol;
+				output.write(String.format(DICTIONARY_FORMAT,
+						dicRef.getEntry()).getBytes());
+			} else if (symbol instanceof Symbol.Reset) {
+				output.write(RESET);
+			} else {
+				throw new IllegalStateException("Cannot write symbol of unknown type " + symbol.getClass().getSimpleName());
 			}
 		}
 
@@ -133,10 +149,14 @@ class XmlCodec implements Codec {
 			Element symbol = (Element) symbols.item(currentSymbol++);
 			String tagName = symbol.getTagName();
 			if (BYTE_TAG.equals(tagName)) {
-				return new Symbol((byte) getNumericAttrib(symbol, VALUE_ATTRIB));
+				return Symbol.newByte((byte) getNumericAttrib(symbol, VALUE_ATTRIB));
 			} else if (REFERENCE_TAG.equals(tagName)) {
-				return new Symbol(getNumericAttrib(symbol, DISTANCE_ATTRIB),
+				return Symbol.newBackRef(getNumericAttrib(symbol, DISTANCE_ATTRIB),
 						getNumericAttrib(symbol, LENGTH_ATTRIB));
+			} else if (DICTIONARY_TAG.equals(tagName)) {
+				return Symbol.newDictionaryRef(getNumericAttrib(symbol, ENTRY_ATTRIB));
+			} else if (RESET_TAG.equals(tagName)) {
+				return Symbol.newReset();
 			} else {
 				throw new IOException(String.format("Unexpected tag '%s'",
 						tagName));

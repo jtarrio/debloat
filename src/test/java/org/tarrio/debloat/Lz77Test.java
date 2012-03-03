@@ -17,11 +17,11 @@ import junit.framework.TestCase;
 public class Lz77Test extends TestCase {
 
 	private static final Symbol[] SYMBOLS = new Symbol[] {
-			new Symbol((byte) 'a'), new Symbol((byte) 'b'),
-			new Symbol((byte) 'c'), new Symbol((byte) 'd'),
-			new Symbol((byte) 'e'), new Symbol(4, 3), new Symbol((byte) 'f'),
-			new Symbol((byte) 'g'), new Symbol((byte) 'h'),
-			new Symbol((byte) 'i'), new Symbol((byte) 'j') };
+			Symbol.newByte('a'), Symbol.newByte('b'),
+			Symbol.newByte('c'), Symbol.newByte('d'),
+			Symbol.newByte('e'), Symbol.newBackRef(4, 3), Symbol.newByte('f'),
+			Symbol.newByte('g'), Symbol.newByte('h'),
+			Symbol.newByte('i'), Symbol.newByte('j') };
 
 	private IMocksControl control;
 	private InputStream input;

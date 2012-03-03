@@ -45,10 +45,13 @@ public class Lz77 implements CompressionAlgorithm {
 		RingBuffer buffer = new RingBufferImpl(output);
 		Symbol symbol = decoder.read();
 		while (symbol != null) {
-			if (symbol.isReference()) {
-				buffer.repeatPastMatch(symbol.getDistance(), symbol.getLength());
+			if (symbol instanceof Symbol.BackRef) {
+				Symbol.BackRef backref = (Symbol.BackRef) symbol;
+				buffer.repeatPastMatch(backref.getDistance(), backref.getLength());
+			} else if (symbol instanceof Symbol.Byte) {
+				buffer.write(((Symbol.Byte) symbol).getByteValue());
 			} else {
-				buffer.write(symbol.getByte());
+				throw new IllegalStateException("Found symbol of unrecognized type " + symbol.getClass().getSimpleName());
 			}
 			symbol = decoder.read();
 		}
@@ -68,10 +71,10 @@ public class Lz77 implements CompressionAlgorithm {
 		Match match = buffer.findPastMatch();
 		if (match != null) {
 			buffer.skip(match.getLength());
-			return new Symbol(match.getDistance(), match.getLength());
+			return Symbol.newBackRef(match.getDistance(), match.getLength());
 		} else {
 			int read = buffer.read(buf, 1);
-			return read == 1 ? new Symbol(buf[0]) : null;
+			return read == 1 ? Symbol.newByte(buf[0]) : null;
 		}
 	}
 }

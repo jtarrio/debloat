@@ -14,22 +14,17 @@ public class XmlCodecTest extends TestCase {
 
 	private static final String ALGORITHM = "testAlgo";
 
-	private static final Symbol[] SYMBOLS = new Symbol[] {
-			new Symbol((byte) 'a'), new Symbol((byte) 'b'),
-			new Symbol((byte) 'c'), new Symbol((byte) 'd'),
-			new Symbol((byte) 'e'), new Symbol(4, 3), new Symbol((byte) 'f'),
-			new Symbol((byte) 'g'), new Symbol((byte) 'h'),
-			new Symbol((byte) 'i'), new Symbol((byte) 'j') };
+	private static final Symbol[] SYMBOLS = new Symbol[] { Symbol.newByte('a'),
+			Symbol.newBackRef(4, 3), Symbol.newDictionaryRef(567),
+			Symbol.newReset() };
 
 	private static final String COMPRESSED_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			+ "<compressedData algorithm=\"testAlgo\">\n"
-			+ "  <byte value=\"97\"/>\n  <byte value=\"98\"/>\n"
-			+ "  <byte value=\"99\"/>\n  <byte value=\"100\"/>\n"
-			+ "  <byte value=\"101\"/>\n"
+			+ "  <byte value=\"97\"/>\n"
 			+ "  <reference distance=\"4\" length=\"3\"/>\n"
-			+ "  <byte value=\"102\"/>\n  <byte value=\"103\"/>\n"
-			+ "  <byte value=\"104\"/>\n  <byte value=\"105\"/>\n"
-			+ "  <byte value=\"106\"/>\n</compressedData>\n";
+			+ "  <dictionary entry=\"567\"/>\n"
+			+ "  <reset/>\n"
+			+ "</compressedData>\n";
 	private XmlCodec codec;
 	private ByteArrayOutputStream output;
 	private Encoder encoder;
