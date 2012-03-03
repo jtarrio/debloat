@@ -7,7 +7,6 @@ import java.io.OutputStream;
 
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
-import org.tarrio.dilate.CompressionAlgorithmRegistry.CompressionAlgorithmProvider;
 import org.tarrio.dilate.Codec.Decoder;
 import org.tarrio.dilate.Codec.Encoder;
 
@@ -26,8 +25,7 @@ public class CompressionAlgorithmRegistryTest extends TestCase {
 	protected void setUp() throws Exception {
 		control = EasyMock.createControl();
 		registry = new CompressionAlgorithmRegistry();
-		provider = control
-				.createMock(CompressionAlgorithmRegistry.CompressionAlgorithmProvider.class);
+		provider = control.createMock(CompressionAlgorithmProvider.class);
 		compressor = control.createMock(CompressionAlgorithm.class);
 	}
 
@@ -41,14 +39,24 @@ public class CompressionAlgorithmRegistryTest extends TestCase {
 		EasyMock.expect(provider.get()).andReturn(compressor);
 
 		control.replay();
-		registry.register(TEST_ALGORITHM, provider);
+		registry.registerFromModule(new CompressionAlgorithmRegistrationModule() {
+			@Override
+			public void configure(CompressionAlgorithmBinder binder) {
+				binder.bind(TEST_ALGORITHM).toProvider(provider);
+			}
+		});
 		assertEquals(compressor, registry.get(TEST_ALGORITHM));
 		control.verify();
 	}
 
 	public void testProvidesRegisteredInstance() throws Exception {
 		control.replay();
-		registry.register(TEST_ALGORITHM, compressor);
+		registry.registerFromModule(new CompressionAlgorithmRegistrationModule() {
+			@Override
+			public void configure(CompressionAlgorithmBinder binder) {
+				binder.bind(TEST_ALGORITHM).toInstance(compressor);
+			}
+		});
 		assertEquals(compressor, registry.get(TEST_ALGORITHM));
 		control.verify();
 	}
@@ -56,7 +64,12 @@ public class CompressionAlgorithmRegistryTest extends TestCase {
 	public void testInstantiatesCompressorUsingDefaultConstructor()
 			throws Exception {
 		control.replay();
-		registry.register(TEST_ALGORITHM, MockCompressor.class);
+		registry.registerFromModule(new CompressionAlgorithmRegistrationModule() {
+			@Override
+			public void configure(CompressionAlgorithmBinder binder) {
+				binder.bind(TEST_ALGORITHM).to(MockCompressor.class);
+			}
+		});
 		CompressionAlgorithm returnedCompressor = registry.get(TEST_ALGORITHM);
 		assertTrue(returnedCompressor instanceof MockCompressor);
 		assertTrue(((MockCompressor) returnedCompressor).usedDefault);

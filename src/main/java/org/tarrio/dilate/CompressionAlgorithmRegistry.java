@@ -76,78 +76,6 @@ public class CompressionAlgorithmRegistry {
 	}
 
 	/**
-	 * Registers a compression algorithm provider.
-	 * 
-	 * @param algorithm
-	 *            The name of the algorithm to register.
-	 * @param compressorProvider
-	 *            The provider for the algorithm instances.
-	 */
-	public void register(String algorithm,
-			CompressionAlgorithmProvider compressorProvider) {
-		algorithms.put(algorithm, compressorProvider);
-	}
-
-	/**
-	 * Registers a compression algorithm instance.
-	 * 
-	 * @param algorithm
-	 *            The name of the algorithm to register.
-	 * @param algorithmInstance
-	 *            The singleton instance to use.
-	 */
-	public void register(String algorithm,
-			final CompressionAlgorithm algorithmInstance) {
-		algorithms.put(algorithm, new CompressionAlgorithmProvider() {
-			@Override
-			public CompressionAlgorithm get() {
-				return algorithmInstance;
-			}
-		});
-	}
-
-	/**
-	 * Registers a compression algorithm class.
-	 * 
-	 * @param algorithm
-	 *            The name of the algorithm to register.
-	 * @param algorithmClass
-	 *            The class that implements the algorithm.
-	 */
-	public void register(String algorithm,
-			final Class<? extends CompressionAlgorithm> algorithmClass) {
-		algorithms.put(algorithm, new CompressionAlgorithmProvider() {
-			@Override
-			public CompressionAlgorithm get() {
-				try {
-					return algorithmClass.newInstance();
-				} catch (InstantiationException e) {
-					throw new RuntimeException(e);
-				} catch (IllegalAccessException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		});
-	}
-
-	/**
-	 * Registers a compression algorithm class from its name.
-	 * 
-	 * @param algorithm
-	 *            The name of the algorithm to register.
-	 * @param className
-	 *            The full name of the class that implements the algorithm.
-	 * @throws ClassNotFoundException
-	 *             If the specified class was not found.
-	 */
-	@SuppressWarnings("unchecked")
-	public void register(String algorithm, String className)
-			throws ClassNotFoundException {
-		register(algorithm,
-				(Class<CompressionAlgorithm>) Class.forName(className));
-	}
-
-	/**
 	 * Registers new algorithm implementations from a properties file.
 	 * 
 	 * Each property key is the name of the algorithm; the value is the full
@@ -193,6 +121,24 @@ public class CompressionAlgorithmRegistry {
 	}
 
 	/**
+	 * Registers new algorithm implementations programmatically from a
+	 * {@link CompressionAlgorithmRegistrationModule}.
+	 * 
+	 * @param module
+	 *            The module to get the configuration from.
+	 */
+	public void registerFromModule(CompressionAlgorithmRegistrationModule module) {
+		module.configure(new CompressionAlgorithmBinderImpl());
+	}
+
+	@SuppressWarnings("unchecked")
+	private void register(String name, String className)
+			throws ClassNotFoundException {
+		algorithms.put(name, new CompressionAlgorithmFromClassProviderImpl(
+				(Class<CompressionAlgorithm>) Class.forName(className)));
+	}
+
+	/**
 	 * Reads the default configuration from the default configuration XML file
 	 * resource.
 	 * 
@@ -210,9 +156,85 @@ public class CompressionAlgorithmRegistry {
 	}
 
 	/**
-	 * An interface for classes that return compression algorithm instances.
+	 * A private implementation of {@link CompressionAlgorithmBinder}.
 	 */
-	public interface CompressionAlgorithmProvider {
-		public CompressionAlgorithm get();
+	private class CompressionAlgorithmBinderImpl implements
+			CompressionAlgorithmBinder {
+		@Override
+		public CompressionAlgorithmSelector bind(final String name) {
+			return new CompressionAlgorithmSelectorImpl(name);
+		}
+	}
+
+	/**
+	 * A private implementation of {@link CompressionAlgorithmSelector}.
+	 */
+	private class CompressionAlgorithmSelectorImpl implements
+			CompressionAlgorithmSelector {
+		private final String name;
+
+		private CompressionAlgorithmSelectorImpl(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public void to(Class<? extends CompressionAlgorithm> algorithm) {
+			toProvider(new CompressionAlgorithmFromClassProviderImpl(algorithm));
+		}
+
+		@Override
+		public void toProvider(CompressionAlgorithmProvider provider) {
+			algorithms.put(name, provider);
+		}
+
+		@Override
+		public void toInstance(final CompressionAlgorithm instance) {
+			toProvider(new CompressionAlgorithmFromInstanceProviderImpl(
+					instance));
+		}
+	}
+
+	/**
+	 * A {@link CompressionAlgorithmProvider} that always returns the same
+	 * instance.
+	 */
+	private class CompressionAlgorithmFromInstanceProviderImpl implements
+			CompressionAlgorithmProvider {
+		private final CompressionAlgorithm instance;
+
+		private CompressionAlgorithmFromInstanceProviderImpl(
+				CompressionAlgorithm instance) {
+			this.instance = instance;
+		}
+
+		@Override
+		public CompressionAlgorithm get() {
+			return instance;
+		}
+	}
+
+	/**
+	 * A {@link CompressionAlgorithmProvider} that creates new instances of a
+	 * class using its default constructor and returns that instance.
+	 */
+	private class CompressionAlgorithmFromClassProviderImpl implements
+			CompressionAlgorithmProvider {
+		private final Class<? extends CompressionAlgorithm> algorithm;
+
+		private CompressionAlgorithmFromClassProviderImpl(
+				Class<? extends CompressionAlgorithm> algorithm) {
+			this.algorithm = algorithm;
+		}
+
+		@Override
+		public CompressionAlgorithm get() {
+			try {
+				return algorithm.newInstance();
+			} catch (InstantiationException e) {
+				throw new RuntimeException(e);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 }
