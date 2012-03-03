@@ -127,7 +127,8 @@ public class RingBufferTest extends TestCase {
 	public void testFindPastMatchCantExceedMaxDistance() throws Exception {
 		Match match = getMatchForDistanceAndLength(32769, 258);
 		assertNotNull(match);
-		// It finds the 00 00 01 at position 511 (FF 00 / 00 01 at position 510).
+		// It finds the 00 00 01 at position 511 (FF 00 / 00 01 at position
+		// 510).
 		assertEquals(32258, match.getDistance());
 		assertEquals(3, match.getLength());
 	}
@@ -142,7 +143,7 @@ public class RingBufferTest extends TestCase {
 		Match match = buffer.findPastMatch();
 		return match;
 	}
-	
+
 	private void fillWithNumbers(byte[] buffer, int offset, int length) {
 		for (int i = 0; i < length; ++i) {
 			int counter = i / 2;
@@ -208,40 +209,19 @@ public class RingBufferTest extends TestCase {
 				testData.length);
 	}
 
-//	private LookupBuffer makeBuffer(byte[] testData) {
-//		return new LookupBufferImpl(new ByteArrayInputStream(testData));
-//	}
-//
-//	private LookupBuffer makeBuffer(byte[] testData, int bufferLength) {
-//		return new LookupBufferImpl(new ByteArrayInputStream(testData),
-//				bufferLength, 0, bufferLength);
-//	}
-//
-//	private LookupBuffer makeBuffer(byte[] testData, int bufferLength,
-//			int lookupLength) {
-//		return new LookupBufferImpl(new ByteArrayInputStream(testData),
-//				bufferLength, lookupLength, lookupLength);
-//	}
-//
-//	private LookupBuffer makeBuffer(ByteArrayOutputStream stream) {
-//		return new LookupBufferImpl(stream);
-//	}
-//	
-//	private LookupBuffer makeBuffer(ByteArrayOutputStream stream, int bufferLength, int maxDistance, int maxLength) {
-//		return new LookupBufferImpl(stream, bufferLength, maxDistance, maxLength);
-//	}
-
 	private RingBuffer makeBuffer(byte[] testData) {
 		return new RingBufferImpl(new ByteArrayInputStream(testData));
 	}
 
 	private RingBuffer makeBuffer(byte[] testData, int bufferLength) {
-		return new RingBufferImpl(new ByteArrayInputStream(testData), 0, bufferLength);
+		return new RingBufferImpl(new ByteArrayInputStream(testData),
+				bufferLength + 1, 0, bufferLength);
 	}
 
 	private RingBuffer makeBuffer(byte[] testData, int bufferLength,
 			int lookupLength) {
-		return new RingBufferImpl(new ByteArrayInputStream(testData), lookupLength, bufferLength);
+		return new RingBufferImpl(new ByteArrayInputStream(testData),
+				bufferLength, lookupLength, bufferLength - lookupLength - 1);
 	}
 
 	private RingBuffer makeBuffer(ByteArrayOutputStream stream) {

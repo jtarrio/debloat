@@ -44,7 +44,7 @@ public class RingBufferImpl implements RingBuffer {
 	 *            The stream to read the data from.
 	 */
 	public RingBufferImpl(InputStream inputStream) {
-		this(inputStream, DEFAULT_MAX_DISTANCE, DEFAULT_MAX_LENGTH);
+		this(inputStream, 2 * DEFAULT_MAX_DISTANCE, DEFAULT_MAX_DISTANCE, DEFAULT_MAX_LENGTH);
 	}
 
 	/**
@@ -57,12 +57,12 @@ public class RingBufferImpl implements RingBuffer {
 	 * @param maxLength
 	 *            Maximum match length.
 	 */
-	RingBufferImpl(InputStream inputStream, int maxDistance, int maxLength) {
+	RingBufferImpl(InputStream inputStream, int bufferSize, int maxDistance, int maxLength) {
 		this.inputStream = inputStream;
 		this.outputStream = null;
 		this.maxDistance = maxDistance;
 		this.maxLength = maxLength;
-		this.buffer = new byte[maxDistance + maxLength + 1];
+		this.buffer = new byte[Math.max(bufferSize, maxDistance + maxLength + 1)];
 		this.bufPosOffset = 0;
 		this.bufBottom = 0;
 		this.bufPos = 0;
@@ -229,11 +229,9 @@ public class RingBufferImpl implements RingBuffer {
 		if (eof) {
 			return;
 		}
-		int usedBelow = bufPos + (bufPos >= bufBottom ? 0 : buffer.length)
-				- bufBottom;
-		int usedAbove = bufTop + (bufTop >= bufPos ? 0 : buffer.length)
-				- bufPos;
-		if (usedBelow > maxDistance) {
+		int usedBelow = (bufPos + buffer.length - bufBottom) % buffer.length;
+		int usedAbove = (bufTop + buffer.length - bufPos) % buffer.length;
+		if (usedBelow > maxDistance && usedAbove <= maxLength) {
 			int discard = usedBelow - maxDistance;
 			bufBottom += discard;
 			bufBottom %= buffer.length;
@@ -325,8 +323,7 @@ public class RingBufferImpl implements RingBuffer {
 		if (outputStream == null) {
 			throw new IllegalStateException("Cannot write to read buffer");
 		}
-		int usedBelow = bufPos + (bufPos >= bufBottom ? 0 : buffer.length)
-				- bufBottom;
+		int usedBelow = (bufPos + buffer.length - bufBottom) % buffer.length;
 		if (usedBelow > maxDistance) {
 			int discard = usedBelow - maxDistance;
 			bufBottom += discard;
