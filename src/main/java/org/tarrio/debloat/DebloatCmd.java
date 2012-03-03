@@ -1,4 +1,4 @@
-package org.tarrio.dilate;
+package org.tarrio.debloat;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -7,16 +7,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.tarrio.dilate.Codec.Decoder;
-import org.tarrio.dilate.registry.CompressionAlgorithmRegistry;
+import org.tarrio.debloat.Codec.Decoder;
+import org.tarrio.debloat.registry.CompressionAlgorithmRegistry;
 
 /**
  * Example command-line utility to compress and decompress files using the
- * Dilate library.
+ * Debloat library.
  * 
  * @author Jacobo Tarrio
  */
-public class Dilate {
+public class DebloatCmd {
 
 	private final InputStream inputStream;
 	private final OutputStream outputStream;
@@ -27,7 +27,7 @@ public class Dilate {
 		COMPRESS, DECOMPRESS;
 	}
 
-	public Dilate(String inputFileName, String outputFileName,
+	public DebloatCmd(String inputFileName, String outputFileName,
 			String algorithm, Operation operation) throws FileNotFoundException {
 		this.inputStream = inputFileName == null ? System.in
 				: new FileInputStream(inputFileName);
@@ -70,7 +70,7 @@ public class Dilate {
 		}
 	}
 
-	public static Dilate parseArgs(String[] args) throws FileNotFoundException {
+	public static DebloatCmd parseArgs(String[] args) throws FileNotFoundException {
 		String input = null;
 		String output = null;
 		String algorithm = "LZ77";
@@ -97,7 +97,7 @@ public class Dilate {
 			}
 		}
 
-		Dilate dilate = new Dilate(input, output, algorithm, operation);
+		DebloatCmd dilate = new DebloatCmd(input, output, algorithm, operation);
 		return dilate;
 	}
 

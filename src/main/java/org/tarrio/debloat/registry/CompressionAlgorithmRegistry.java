@@ -1,4 +1,4 @@
-package org.tarrio.dilate.registry;
+package org.tarrio.debloat.registry;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.tarrio.dilate.Codec;
-import org.tarrio.dilate.CompressionAlgorithm;
+import org.tarrio.debloat.Codec;
+import org.tarrio.debloat.CompressionAlgorithm;
 
 /**
  * A central registry for compression algorithms.
@@ -20,7 +20,7 @@ public class CompressionAlgorithmRegistry {
 	/**
 	 * The name of the file resource containing the default configuration.
 	 */
-	private static final String XML_CONFIG_FILE = "dilate-algorithms.xml";
+	private static final String XML_CONFIG_FILE = "algorithms.xml";
 
 	/**
 	 * The singleton instance.

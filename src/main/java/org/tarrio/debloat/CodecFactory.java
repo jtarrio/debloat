@@ -1,4 +1,4 @@
-package org.tarrio.dilate;
+package org.tarrio.debloat;
 
 /**
  * Returns a codec instance.

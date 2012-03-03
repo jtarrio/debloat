@@ -1,4 +1,4 @@
-package org.tarrio.dilate;
+package org.tarrio.debloat;
 
 import java.io.IOException;
 import java.io.InputStream;

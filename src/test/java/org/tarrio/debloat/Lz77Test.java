@@ -1,4 +1,4 @@
-package org.tarrio.dilate;
+package org.tarrio.debloat;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -7,6 +7,10 @@ import java.io.OutputStream;
 
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
+import org.tarrio.debloat.Codec;
+import org.tarrio.debloat.CompressionAlgorithm;
+import org.tarrio.debloat.Lz77;
+import org.tarrio.debloat.Symbol;
 
 import junit.framework.TestCase;
 

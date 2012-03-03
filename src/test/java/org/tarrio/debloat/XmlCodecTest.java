@@ -1,10 +1,12 @@
-package org.tarrio.dilate;
+package org.tarrio.debloat;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import org.tarrio.dilate.Codec.Decoder;
-import org.tarrio.dilate.Codec.Encoder;
+import org.tarrio.debloat.Symbol;
+import org.tarrio.debloat.XmlCodec;
+import org.tarrio.debloat.Codec.Decoder;
+import org.tarrio.debloat.Codec.Encoder;
 
 import junit.framework.TestCase;
 

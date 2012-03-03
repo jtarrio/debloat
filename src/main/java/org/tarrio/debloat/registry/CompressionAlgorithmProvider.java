@@ -1,6 +1,6 @@
-package org.tarrio.dilate.registry;
+package org.tarrio.debloat.registry;
 
-import org.tarrio.dilate.CompressionAlgorithm;
+import org.tarrio.debloat.CompressionAlgorithm;
 
 /**
  * An interface for classes that return compression algorithm instances.

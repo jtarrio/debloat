@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.tarrio</groupId>
-	<artifactId>dilate</artifactId>
+	<artifactId>debloat</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>dilate</name>
+	<name>debloat</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>

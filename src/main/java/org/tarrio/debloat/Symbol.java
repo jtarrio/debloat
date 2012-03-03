@@ -1,4 +1,4 @@
-package org.tarrio.dilate;
+package org.tarrio.debloat;
 
 /**
  * A class that represents a symbol consisting of either a single byte or a

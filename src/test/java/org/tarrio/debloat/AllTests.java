@@ -1,6 +1,6 @@
-package org.tarrio.dilate;
+package org.tarrio.debloat;
 
-import org.tarrio.dilate.registry.CompressionAlgorithmRegistryTest;
+import org.tarrio.debloat.registry.CompressionAlgorithmRegistryTest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

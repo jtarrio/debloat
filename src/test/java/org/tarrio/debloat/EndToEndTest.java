@@ -1,11 +1,13 @@
-package org.tarrio.dilate;
+package org.tarrio.debloat;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.tarrio.dilate.registry.CompressionAlgorithmRegistry;
+import org.tarrio.debloat.CompressionAlgorithm;
+import org.tarrio.debloat.XmlCodec;
+import org.tarrio.debloat.registry.CompressionAlgorithmRegistry;
 
 import junit.framework.TestCase;
 

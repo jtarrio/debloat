@@ -1,10 +1,10 @@
-package org.tarrio.dilate;
+package org.tarrio.debloat;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.tarrio.dilate.RingBuffer.Match;
+import org.tarrio.debloat.RingBuffer.Match;
 
 /**
  * Implementation of LZ77.
