@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.tarrio.dilate.Codec;
 import org.tarrio.dilate.CompressionAlgorithm;
-import org.tarrio.dilate.Codec.Decoder;
 
 /**
  * A central registry for compression algorithms.
