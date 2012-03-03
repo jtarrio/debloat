@@ -14,9 +14,9 @@ public class XmlCodecTest extends TestCase {
 
 	private static final String ALGORITHM = "testAlgo";
 
-	private static final Symbol[] SYMBOLS = new Symbol[] { Symbol.newByte('a'),
-			Symbol.newBackRef(4, 3), Symbol.newDictionaryRef(567),
-			Symbol.newReset() };
+	private static final Symbol[] SYMBOLS = new Symbol[] {
+			Symbol.newByte((byte) 'a'), Symbol.newBackRef(4, 3),
+			Symbol.newDictionaryRef(567), Symbol.newReset() };
 
 	private static final String COMPRESSED_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			+ "<compressedData algorithm=\"testAlgo\">\n"

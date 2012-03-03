@@ -23,20 +23,6 @@ public abstract class Symbol {
 	}
 
 	/**
-	 * Factory method to get a symbol that represents a byte, from a single
-	 * character.
-	 * 
-	 * This method exists for convenience on unit testing.
-	 * 
-	 * @param charValue
-	 *            A character to represent as a byte.
-	 * @return A symbol of byte type.
-	 */
-	static Symbol newByte(char charValue) {
-		return newByte((byte) charValue);
-	}
-
-	/**
 	 * Factory method to get a symbol that represents a backreference.
 	 * 
 	 * @param distance
