@@ -37,7 +37,8 @@ public class EndToEndTest extends TestCase {
 
 	public void testCompressUncompressText() throws Exception {
 		Codec codec = CodecFactory.getCodec();
-		CompressionAlgorithm compressor = CompressionAlgorithmRegistry.getInstance().get("LZ77");
+		CompressionAlgorithm compressor = CompressionAlgorithmRegistry
+				.getInstance().get("LZ77");
 		ByteArrayOutputStream compressedStream = new ByteArrayOutputStream();
 		compressor.compress(new ByteArrayInputStream(TEST_DATA.getBytes()),
 				codec.getEncoder(compressedStream));
@@ -57,7 +58,8 @@ public class EndToEndTest extends TestCase {
 		}
 
 		Codec codec = CodecFactory.getCodec();
-		CompressionAlgorithm compressor = CompressionAlgorithmRegistry.getInstance().get("LZ77");
+		CompressionAlgorithm compressor = CompressionAlgorithmRegistry
+				.getInstance().get("LZ77");
 		ByteArrayOutputStream compressedStream = new ByteArrayOutputStream();
 		compressor.compress(new ByteArrayInputStream(bytes),
 				codec.getEncoder(compressedStream));
