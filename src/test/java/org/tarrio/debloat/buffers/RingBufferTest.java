@@ -1,12 +1,12 @@
-package org.tarrio.debloat;
+package org.tarrio.debloat.buffers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.tarrio.debloat.RingBuffer;
-import org.tarrio.debloat.RingBufferImpl;
-import org.tarrio.debloat.RingBuffer.Match;
+import org.tarrio.debloat.buffers.RingBuffer;
+import org.tarrio.debloat.buffers.RingBufferImpl;
+import org.tarrio.debloat.buffers.RingBuffer.Match;
 
 import junit.framework.TestCase;
 

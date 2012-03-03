@@ -1,4 +1,4 @@
-package org.tarrio.debloat;
+package org.tarrio.debloat.buffers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +43,7 @@ public class RingBufferImpl implements RingBuffer {
 	 * @param inputStream
 	 *            The stream to read the data from.
 	 */
-	public RingBufferImpl(InputStream inputStream) {
+	RingBufferImpl(InputStream inputStream) {
 		this(inputStream, 2 * DEFAULT_MAX_DISTANCE, DEFAULT_MAX_DISTANCE, DEFAULT_MAX_LENGTH);
 	}
 
@@ -77,7 +77,7 @@ public class RingBufferImpl implements RingBuffer {
 	 * @param outputStream
 	 *            The stream to write the data to.
 	 */
-	public RingBufferImpl(OutputStream outputStream) {
+	RingBufferImpl(OutputStream outputStream) {
 		this(outputStream, DEFAULT_MAX_DISTANCE, DEFAULT_MAX_LENGTH);
 	}
 

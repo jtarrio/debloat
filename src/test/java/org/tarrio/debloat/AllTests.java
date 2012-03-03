@@ -1,5 +1,6 @@
 package org.tarrio.debloat;
 
+import org.tarrio.debloat.buffers.RingBufferTest;
 import org.tarrio.debloat.registry.CompressionAlgorithmRegistryTest;
 
 import junit.framework.Test;

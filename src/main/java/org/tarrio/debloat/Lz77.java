@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.tarrio.debloat.RingBuffer.Match;
+import org.tarrio.debloat.buffers.RingBuffer;
+import org.tarrio.debloat.buffers.RingBufferFactory;
+import org.tarrio.debloat.buffers.RingBuffer.Match;
 
 /**
  * Implementation of LZ77.
@@ -23,7 +25,7 @@ public class Lz77 implements CompressionAlgorithm {
 	@Override
 	public void compress(InputStream input, Codec.Encoder encoder)
 			throws IOException {
-		RingBuffer buffer = new RingBufferImpl(input);
+		RingBuffer buffer = RingBufferFactory.newReadBuffer(input);
 		encoder.setAlgorithm(ALGORITHM);
 		Symbol symbol = readNextSymbol(buffer);
 		while (symbol != null) {
@@ -42,7 +44,7 @@ public class Lz77 implements CompressionAlgorithm {
 					"Tried to decompress %s data with a %s decompressor",
 					algoritm, ALGORITHM));
 		}
-		RingBuffer buffer = new RingBufferImpl(output);
+		RingBuffer buffer = RingBufferFactory.newWriteBuffer(output);
 		Symbol symbol = decoder.read();
 		while (symbol != null) {
 			if (symbol instanceof Symbol.BackRef) {

@@ -1,4 +1,4 @@
-package org.tarrio.debloat;
+package org.tarrio.debloat.buffers;
 
 import java.io.IOException;
 
