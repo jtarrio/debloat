@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.tarrio.dilate.registry.CompressionAlgorithmRegistry;
+
 import junit.framework.TestCase;
 
 public class EndToEndTest extends TestCase {

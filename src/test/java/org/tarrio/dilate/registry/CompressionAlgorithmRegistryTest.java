@@ -1,4 +1,4 @@
-package org.tarrio.dilate;
+package org.tarrio.dilate.registry;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -7,8 +7,14 @@ import java.io.OutputStream;
 
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
+import org.tarrio.dilate.Codec;
+import org.tarrio.dilate.CompressionAlgorithm;
 import org.tarrio.dilate.Codec.Decoder;
 import org.tarrio.dilate.Codec.Encoder;
+import org.tarrio.dilate.registry.CompressionAlgorithmBinder;
+import org.tarrio.dilate.registry.CompressionAlgorithmProvider;
+import org.tarrio.dilate.registry.CompressionAlgorithmRegistrationModule;
+import org.tarrio.dilate.registry.CompressionAlgorithmRegistry;
 
 import junit.framework.TestCase;
 

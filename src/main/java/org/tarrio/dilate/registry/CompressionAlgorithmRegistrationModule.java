@@ -1,4 +1,6 @@
-package org.tarrio.dilate;
+package org.tarrio.dilate.registry;
+
+import org.tarrio.dilate.CompressionAlgorithm;
 
 /**
  * Interface for programmatic configuration of the

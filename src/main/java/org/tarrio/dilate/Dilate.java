@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.tarrio.dilate.Codec.Decoder;
+import org.tarrio.dilate.registry.CompressionAlgorithmRegistry;
 
 /**
  * Example command-line utility to compress and decompress files using the

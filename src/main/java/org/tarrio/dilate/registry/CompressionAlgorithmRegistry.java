@@ -1,4 +1,4 @@
-package org.tarrio.dilate;
+package org.tarrio.dilate.registry;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import org.tarrio.dilate.Codec;
+import org.tarrio.dilate.CompressionAlgorithm;
+import org.tarrio.dilate.Codec.Decoder;
 
 /**
  * A central registry for compression algorithms.

@@ -1,4 +1,4 @@
-package org.tarrio.dilate;
+package org.tarrio.dilate.registry;
 
 /**
  * An interface that allows to give the name of an algorithm to configure.

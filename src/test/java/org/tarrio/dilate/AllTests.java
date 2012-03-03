@@ -1,5 +1,7 @@
 package org.tarrio.dilate;
 
+import org.tarrio.dilate.registry.CompressionAlgorithmRegistryTest;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
