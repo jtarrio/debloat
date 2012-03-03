@@ -97,8 +97,7 @@ public class DebloatCmd {
 			}
 		}
 
-		DebloatCmd dilate = new DebloatCmd(input, output, algorithm, operation);
-		return dilate;
+		return new DebloatCmd(input, output, algorithm, operation);
 	}
 
 	public static void main(String[] args) throws IOException {
