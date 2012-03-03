@@ -1,4 +1,6 @@
-package org.tarrio.debloat;
+package org.tarrio.debloat.codecs;
+
+import org.tarrio.debloat.Codec;
 
 /**
  * Returns a codec instance.

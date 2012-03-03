@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import org.tarrio.debloat.CompressionAlgorithm;
-import org.tarrio.debloat.XmlCodec;
+import org.tarrio.debloat.codecs.CodecFactory;
 import org.tarrio.debloat.registry.CompressionAlgorithmRegistry;
 
 import junit.framework.TestCase;
@@ -36,7 +36,7 @@ public class EndToEndTest extends TestCase {
 			+ " en la narración dél no se salga un punto de la verdad.";
 
 	public void testCompressUncompressText() throws Exception {
-		XmlCodec codec = new XmlCodec();
+		Codec codec = CodecFactory.getCodec();
 		CompressionAlgorithm compressor = CompressionAlgorithmRegistry.getInstance().get("LZ77");
 		ByteArrayOutputStream compressedStream = new ByteArrayOutputStream();
 		compressor.compress(new ByteArrayInputStream(TEST_DATA.getBytes()),
@@ -56,7 +56,7 @@ public class EndToEndTest extends TestCase {
 			bytes[i] = (byte) random.nextInt(256);
 		}
 
-		XmlCodec codec = new XmlCodec();
+		Codec codec = CodecFactory.getCodec();
 		CompressionAlgorithm compressor = CompressionAlgorithmRegistry.getInstance().get("LZ77");
 		ByteArrayOutputStream compressedStream = new ByteArrayOutputStream();
 		compressor.compress(new ByteArrayInputStream(bytes),

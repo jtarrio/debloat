@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.tarrio.debloat.Codec.Decoder;
+import org.tarrio.debloat.codecs.CodecFactory;
 import org.tarrio.debloat.registry.CompressionAlgorithmRegistry;
 
 /**
