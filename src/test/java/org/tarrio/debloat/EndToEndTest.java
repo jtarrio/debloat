@@ -3,7 +3,6 @@ package org.tarrio.debloat;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Random;
 
 import org.tarrio.debloat.CompressionAlgorithm;
@@ -35,7 +34,7 @@ public class EndToEndTest extends TestCase {
 			+ " por conjeturas verosímiles, se deja entender que se llamaba"
 			+ " Quejana. Pero esto importa poco a nuestro cuento; basta que"
 			+ " en la narración dél no se salga un punto de la verdad.";
-	
+
 	private static final byte[] BINARY_DATA = makeBinaryData();
 
 	public void testCompressUncompressTextWithLz77() throws Exception {
@@ -62,6 +61,49 @@ public class EndToEndTest extends TestCase {
 		doTestCompressUncompress(compressor, BINARY_DATA);
 	}
 
+	private void doTestCompressUncompress(CompressionAlgorithm compressor,
+			byte[] testData) throws IOException {
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(testData);
+		Codec codec = CodecFactory.getCodec();
+		ByteArrayOutputStream compressedStream = new ByteArrayOutputStream();
+		compressor.compress(inputStream, codec.getEncoder(compressedStream));
+
+		ByteArrayOutputStream uncompressedStream = new ByteArrayOutputStream();
+		compressor.decompress(codec.getDecoder(new ByteArrayInputStream(
+				compressedStream.toByteArray())), uncompressedStream);
+
+		assertByteArraysEqual(testData, uncompressedStream.toByteArray());
+	}
+
+	private void assertByteArraysEqual(byte[] expected, byte[] actual) {
+		int[] differences = new int[10];
+		int diffCount = 0;
+		boolean more = false;
+		assertEquals("Sizes should be the same", expected.length, actual.length);
+		for (int i = 0; i < expected.length; ++i) {
+			if (expected[i] != actual[i]) {
+				if (diffCount == differences.length) {
+					more = true;
+					break;
+				}
+				differences[diffCount++] = i;
+			}
+		}
+		if (diffCount != 0) {
+			StringBuilder sb = new StringBuilder("Differences found: ");
+			for (int i = 0; i < diffCount; ++i) {
+				int index = differences[i];
+				sb.append(String.format(
+						"\nBytes at position #%d are different: expected %d vs actual %d",
+						index, expected[index] & 0xff, actual[index] & 0xff));
+			}
+			if (more) {
+				sb.append("\n... and more");
+			}
+			fail(sb.toString());
+		}
+	}
+
 	private static byte[] makeBinaryData() {
 		Random random = new Random(1337L);
 		byte[] testData = new byte[200000];
@@ -69,20 +111,5 @@ public class EndToEndTest extends TestCase {
 			testData[i] = (byte) random.nextInt(256);
 		}
 		return testData;
-	}
-
-	private void doTestCompressUncompress(CompressionAlgorithm compressor,
-			byte[] testData) throws IOException {
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(testData);
-		Codec codec = CodecFactory.getCodec();
-		ByteArrayOutputStream compressedStream = new ByteArrayOutputStream();
-		compressor.compress(inputStream,
-				codec.getEncoder(compressedStream));
-
-		ByteArrayOutputStream uncompressedStream = new ByteArrayOutputStream();
-		compressor.decompress(codec.getDecoder(new ByteArrayInputStream(
-				compressedStream.toByteArray())), uncompressedStream);
-	
-		assertTrue(Arrays.equals(testData, uncompressedStream.toByteArray()));
 	}
 }

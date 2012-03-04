@@ -16,6 +16,8 @@ public class LzwTest extends TestCase {
 
 	private static final byte[] SIMPLE_EXAMPLE_BYTES = "TOBEORNOTTOBEORTOBEORNOT"
 			.getBytes();
+	
+	private static final byte[] REPEATED_BYTES = "TOTTTTTTBE".getBytes();
 
 	private static final Symbol[] SIMPLE_EXAMPLE_SYMBOLS = new Symbol[] {
 			Symbol.newDictionaryRef('T'), Symbol.newDictionaryRef('O'),
@@ -39,6 +41,13 @@ public class LzwTest extends TestCase {
 			Symbol.newDictionaryRef('B'), Symbol.newDictionaryRef('E'),
 			Symbol.newDictionaryRef(257), Symbol.newDictionaryRef('N'),
 			Symbol.newDictionaryRef('O'), Symbol.newDictionaryRef('T') };
+	
+	private static final Symbol[] REPEATED_EXAMPLE_SYMBOLS = new Symbol[] {
+		Symbol.newDictionaryRef('T'), Symbol.newDictionaryRef('O'),
+		Symbol.newDictionaryRef('T'), 
+		Symbol.newDictionaryRef(259), Symbol.newDictionaryRef(260),
+		Symbol.newDictionaryRef('B'), Symbol.newDictionaryRef('E')
+	};
 
 	private IMocksControl control;
 	private Encoder encoder;
@@ -60,6 +69,7 @@ public class LzwTest extends TestCase {
 		for (int i = 0; i < SIMPLE_EXAMPLE_SYMBOLS.length; ++i) {
 			encoder.write(SIMPLE_EXAMPLE_SYMBOLS[i]);
 		}
+		encoder.close();
 
 		control.replay();
 		compressor.compress(stream, encoder);
@@ -97,6 +107,7 @@ public class LzwTest extends TestCase {
 		for (int i = 0; i < RESETTING_EXAMPLE_SYMBOLS.length; ++i) {
 			encoder.write(RESETTING_EXAMPLE_SYMBOLS[i]);
 		}
+		encoder.close();
 
 		control.replay();
 		compressor.compress(stream, encoder);
@@ -122,6 +133,44 @@ public class LzwTest extends TestCase {
 		assertEquals(SIMPLE_EXAMPLE_BYTES.length, outputBytes.length);
 		for (int i = 0; i < outputBytes.length; ++i) {
 			assertEquals(SIMPLE_EXAMPLE_BYTES[i], outputBytes[i]);
+		}
+	}
+
+	public void testCompressRepeatedText() throws Exception {
+		Lzw compressor = new Lzw();
+		ByteArrayInputStream stream = new ByteArrayInputStream(
+				REPEATED_BYTES);
+
+		encoder.setAlgorithm(compressor.getAlgorithmName());
+		for (int i = 0; i < REPEATED_EXAMPLE_SYMBOLS.length; ++i) {
+			encoder.write(REPEATED_EXAMPLE_SYMBOLS[i]);
+		}
+		encoder.close();
+
+		control.replay();
+		compressor.compress(stream, encoder);
+		control.verify();
+	}
+
+	public void testDecompressRepeatedText() throws Exception {
+		Lzw compressor = new Lzw();
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+		EasyMock.expect(decoder.getAlgoritm()).andReturn(compressor.getAlgorithmName());
+		for (int i = 0; i < REPEATED_EXAMPLE_SYMBOLS.length; ++i) {
+			EasyMock.expect(decoder.read())
+					.andReturn(REPEATED_EXAMPLE_SYMBOLS[i]);
+		}
+		EasyMock.expect(decoder.read()).andReturn(null);
+
+		control.replay();
+		compressor.decompress(decoder, stream);
+		control.verify();
+
+		byte[] outputBytes = stream.toByteArray();
+		assertEquals(REPEATED_BYTES.length, outputBytes.length);
+		for (int i = 0; i < outputBytes.length; ++i) {
+			assertEquals(REPEATED_BYTES[i], outputBytes[i]);
 		}
 	}
 

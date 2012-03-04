@@ -11,13 +11,13 @@ import org.tarrio.debloat.Codec.Encoder;
 public class Lzw extends AbstractCompressionAlgorithmImpl {
 
 	static final int MAX_ENTRIES = 4096;
-	
+
 	private int maxEntries;
-	
+
 	public Lzw() {
 		this(MAX_ENTRIES);
 	}
-	
+
 	Lzw(int maxEntries) {
 		this.maxEntries = maxEntries;
 	}
@@ -26,7 +26,7 @@ public class Lzw extends AbstractCompressionAlgorithmImpl {
 	protected String getAlgorithmName() {
 		return "lzw";
 	}
-	
+
 	@Override
 	public void doCompress(InputStream input, Encoder outputEncoder)
 			throws IOException {
@@ -80,15 +80,21 @@ public class Lzw extends AbstractCompressionAlgorithmImpl {
 				bufTop = 0;
 			} else if (symbol instanceof Symbol.DictionaryRef) {
 				Symbol.DictionaryRef ref = (Symbol.DictionaryRef) symbol;
-				int length = dict.getEntry(ref.getEntry(), buffer, bufTop);
-				if (prevEntry != null) {
+				int entryNum = ref.getEntry();
+				int dictSize = dict.getSize();
+				if (entryNum == dictSize) {
+					buffer[bufTop] = buffer[0];
+					dict.addEntry(prevEntry, buffer, bufTop + 1);
+				}
+				int length = dict.getEntry(entryNum, buffer, bufTop);
+				if (prevEntry != null && entryNum != dictSize) {
 					dict.addEntry(prevEntry, buffer, bufTop + 1);
 				}
 				if (bufTop > 0) {
 					System.arraycopy(buffer, bufTop, buffer, 0, length);
 				}
 				bufTop = length;
-				prevEntry = ref.getEntry();
+				prevEntry = entryNum;
 			} else if (symbol != null) {
 				throw new IllegalStateException("Read invalid symbol type "
 						+ symbol.getClass().getSimpleName());
