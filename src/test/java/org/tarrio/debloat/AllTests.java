@@ -1,6 +1,7 @@
 package org.tarrio.debloat;
 
 import org.tarrio.debloat.algorithms.Lz77Test;
+import org.tarrio.debloat.algorithms.LzwTest;
 import org.tarrio.debloat.buffers.RingBufferTest;
 import org.tarrio.debloat.codecs.XmlCodecTest;
 import org.tarrio.debloat.registry.CompressionAlgorithmRegistryTest;
@@ -12,13 +13,14 @@ public class AllTests {
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
-		//$JUnit-BEGIN$
+		// $JUnit-BEGIN$
 		suite.addTestSuite(CompressionAlgorithmRegistryTest.class);
 		suite.addTestSuite(EndToEndTest.class);
-		suite.addTestSuite(RingBufferTest.class);
 		suite.addTestSuite(Lz77Test.class);
+		suite.addTestSuite(LzwTest.class);
+		suite.addTestSuite(RingBufferTest.class);
 		suite.addTestSuite(XmlCodecTest.class);
-		//$JUnit-END$
+		// $JUnit-END$
 		return suite;
 	}
 

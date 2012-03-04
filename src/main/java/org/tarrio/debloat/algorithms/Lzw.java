@@ -213,7 +213,7 @@ public class Lzw extends AbstractCompressionAlgorithmImpl {
 				hash %= hashBuckets;
 				entryNum = hashTable[hash];
 			}
-			return entryNum == -1 ? null : entryNum;
+			return entryNum;
 		}
 
 		/**
