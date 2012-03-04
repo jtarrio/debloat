@@ -19,6 +19,8 @@ import org.tarrio.debloat.registry.CompressionAlgorithmRegistry;
  */
 public class DebloatCmd {
 
+	private static final String DEFAULT_ALGORITHM = "lz77";
+
 	private final InputStream inputStream;
 	private final OutputStream outputStream;
 	private final String algorithm;
@@ -41,13 +43,13 @@ public class DebloatCmd {
 	private void run() throws IOException {
 		Codec codec = CodecFactory.getCodec();
 		if (operation == Operation.COMPRESS) {
-			CompressionAlgorithm compressor = CompressionAlgorithmRegistry.getInstance().get(
-					algorithm);
+			CompressionAlgorithm compressor = CompressionAlgorithmRegistry
+					.getInstance().get(algorithm);
 			compressor.compress(inputStream, codec.getEncoder(outputStream));
 		} else {
 			Decoder decoder = codec.getDecoder(inputStream);
-			CompressionAlgorithm compressor = CompressionAlgorithmRegistry.getInstance()
-					.get(decoder);
+			CompressionAlgorithm compressor = CompressionAlgorithmRegistry
+					.getInstance().get(decoder);
 			compressor.decompress(decoder, outputStream);
 		}
 	}
@@ -63,18 +65,20 @@ public class DebloatCmd {
 		System.err.println("Commands:");
 		System.err.println("  -c : Compress (default)");
 		System.err.println("  -d : Decompress");
-		System.err
-				.println("  -a=<algorithm> : Select algorithm (default: LZ77)");
+		System.err.println("  -a=<algorithm> : Select algorithm (default: "
+				+ DEFAULT_ALGORITHM + ")");
 		System.err.println("        Available algorithms:");
-		for (String algorithm : CompressionAlgorithmRegistry.getInstance().getAlgorithms()) {
+		for (String algorithm : CompressionAlgorithmRegistry.getInstance()
+				.getAlgorithms()) {
 			System.err.println("          - " + algorithm);
 		}
 	}
 
-	public static DebloatCmd parseArgs(String[] args) throws FileNotFoundException {
+	public static DebloatCmd parseArgs(String[] args)
+			throws FileNotFoundException {
 		String input = null;
 		String output = null;
-		String algorithm = "LZ77";
+		String algorithm = DEFAULT_ALGORITHM;
 		Operation operation = Operation.COMPRESS;
 		for (String arg : args) {
 			if (arg.startsWith("-") && !"-".equals(arg)) {

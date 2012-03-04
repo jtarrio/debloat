@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-	<entry key="LZ77">org.tarrio.debloat.algorithms.Lz77</entry>
+	<entry key="lz77">org.tarrio.debloat.algorithms.Lz77</entry>
+	<entry key="lzw">org.tarrio.debloat.algorithms.Lzw</entry>
 </properties>

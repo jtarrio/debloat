@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.tarrio.debloat.Codec;
-import org.tarrio.debloat.CompressionAlgorithm;
 import org.tarrio.debloat.Symbol;
 import org.tarrio.debloat.buffers.RingBuffer;
 import org.tarrio.debloat.buffers.RingBufferFactory;
@@ -16,20 +15,17 @@ import org.tarrio.debloat.buffers.RingBuffer.Match;
  * 
  * @author Jacobo Tarrio
  */
-public class Lz77 implements CompressionAlgorithm {
-
-	/**
-	 * This algorithm's name.
-	 * 
-	 * Visible for testing.
-	 */
-	static final String NAME = "LZ77";
+public class Lz77 extends AbstractCompressionAlgorithmImpl {
 
 	@Override
-	public void compress(InputStream input, Codec.Encoder encoder)
+	protected String getAlgorithmName() {
+		return "lz77";
+	}
+	
+	@Override
+	public void doCompress(InputStream input, Codec.Encoder encoder)
 			throws IOException {
 		RingBuffer buffer = RingBufferFactory.newReadBuffer(input);
-		encoder.setAlgorithm(NAME);
 		Symbol symbol = readNextSymbol(buffer);
 		while (symbol != null) {
 			encoder.write(symbol);
@@ -39,14 +35,8 @@ public class Lz77 implements CompressionAlgorithm {
 	}
 
 	@Override
-	public void decompress(Codec.Decoder decoder, OutputStream output)
+	public void doDecompress(Codec.Decoder decoder, OutputStream output)
 			throws IOException {
-		String algoritm = decoder.getAlgoritm();
-		if (!NAME.equals(algoritm)) {
-			throw new IllegalStateException(String.format(
-					"Tried to decompress %s data with a %s decompressor",
-					algoritm, NAME));
-		}
 		RingBuffer buffer = RingBufferFactory.newWriteBuffer(output);
 		Symbol symbol = decoder.read();
 		while (symbol != null) {

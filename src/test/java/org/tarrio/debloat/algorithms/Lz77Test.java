@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.tarrio.debloat.Codec;
-import org.tarrio.debloat.CompressionAlgorithm;
 import org.tarrio.debloat.Symbol;
 import org.tarrio.debloat.algorithms.Lz77;
 
@@ -30,7 +29,7 @@ public class Lz77Test extends TestCase {
 	private Codec codec;
 	private Codec.Encoder encoder;
 	private Codec.Decoder decoder;
-	private CompressionAlgorithm compressor;
+	private Lz77 compressor;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -46,7 +45,7 @@ public class Lz77Test extends TestCase {
 		input = new ByteArrayInputStream("abcdebcdfghij".getBytes());
 
 		EasyMock.expect(codec.getEncoder(output)).andReturn(encoder);
-		encoder.setAlgorithm(Lz77.NAME);
+		encoder.setAlgorithm(compressor.getAlgorithmName());
 		for (Symbol symbol : SYMBOLS) {
 			encoder.write(symbol);
 		}
@@ -59,7 +58,7 @@ public class Lz77Test extends TestCase {
 
 	public void testDecodesSymbols() throws Exception {
 		EasyMock.expect(codec.getDecoder(input)).andReturn(decoder);
-		EasyMock.expect(decoder.getAlgoritm()).andReturn(Lz77.NAME);
+		EasyMock.expect(decoder.getAlgoritm()).andReturn(compressor.getAlgorithmName());
 		for (Symbol symbol : SYMBOLS) {
 			EasyMock.expect(decoder.read()).andReturn(symbol);
 		}

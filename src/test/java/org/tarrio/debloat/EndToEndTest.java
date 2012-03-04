@@ -2,6 +2,7 @@ package org.tarrio.debloat;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -34,40 +35,54 @@ public class EndToEndTest extends TestCase {
 			+ " por conjeturas verosímiles, se deja entender que se llamaba"
 			+ " Quejana. Pero esto importa poco a nuestro cuento; basta que"
 			+ " en la narración dél no se salga un punto de la verdad.";
+	
+	private static final byte[] BINARY_DATA = makeBinaryData();
 
-	public void testCompressUncompressText() throws Exception {
-		Codec codec = CodecFactory.getCodec();
+	public void testCompressUncompressTextWithLz77() throws Exception {
 		CompressionAlgorithm compressor = CompressionAlgorithmRegistry
-				.getInstance().get("LZ77");
-		ByteArrayOutputStream compressedStream = new ByteArrayOutputStream();
-		compressor.compress(new ByteArrayInputStream(TEST_DATA.getBytes()),
-				codec.getEncoder(compressedStream));
-
-		ByteArrayOutputStream uncompressedStream = new ByteArrayOutputStream();
-		compressor.decompress(codec.getDecoder(new ByteArrayInputStream(
-				compressedStream.toByteArray())), uncompressedStream);
-
-		assertEquals(TEST_DATA, uncompressedStream.toString());
+				.getInstance().get("lz77");
+		doTestCompressUncompress(compressor, TEST_DATA.getBytes());
 	}
 
-	public void testCompressUncompressBinaryData() throws Exception {
-		Random random = new Random(1337L);
-		byte[] bytes = new byte[200000];
-		for (int i = 0; i < bytes.length; ++i) {
-			bytes[i] = (byte) random.nextInt(256);
-		}
-
-		Codec codec = CodecFactory.getCodec();
+	public void testCompressUncompressBinaryDataWithLz77() throws Exception {
 		CompressionAlgorithm compressor = CompressionAlgorithmRegistry
-				.getInstance().get("LZ77");
+				.getInstance().get("lz77");
+		doTestCompressUncompress(compressor, BINARY_DATA);
+	}
+
+	public void testCompressUncompressTextWithLzw() throws Exception {
+		CompressionAlgorithm compressor = CompressionAlgorithmRegistry
+				.getInstance().get("lzw");
+		doTestCompressUncompress(compressor, TEST_DATA.getBytes());
+	}
+
+	public void testCompressUncompressBinaryDataWithLzw() throws Exception {
+		CompressionAlgorithm compressor = CompressionAlgorithmRegistry
+				.getInstance().get("lzw");
+		doTestCompressUncompress(compressor, BINARY_DATA);
+	}
+
+	private static byte[] makeBinaryData() {
+		Random random = new Random(1337L);
+		byte[] testData = new byte[200000];
+		for (int i = 0; i < testData.length; ++i) {
+			testData[i] = (byte) random.nextInt(256);
+		}
+		return testData;
+	}
+
+	private void doTestCompressUncompress(CompressionAlgorithm compressor,
+			byte[] testData) throws IOException {
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(testData);
+		Codec codec = CodecFactory.getCodec();
 		ByteArrayOutputStream compressedStream = new ByteArrayOutputStream();
-		compressor.compress(new ByteArrayInputStream(bytes),
+		compressor.compress(inputStream,
 				codec.getEncoder(compressedStream));
 
 		ByteArrayOutputStream uncompressedStream = new ByteArrayOutputStream();
 		compressor.decompress(codec.getDecoder(new ByteArrayInputStream(
 				compressedStream.toByteArray())), uncompressedStream);
-
-		assertTrue(Arrays.equals(bytes, uncompressedStream.toByteArray()));
+	
+		assertTrue(Arrays.equals(testData, uncompressedStream.toByteArray()));
 	}
 }
