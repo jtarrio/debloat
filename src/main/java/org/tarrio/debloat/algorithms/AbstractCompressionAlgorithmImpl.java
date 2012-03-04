@@ -8,25 +8,65 @@ import org.tarrio.debloat.CompressionAlgorithm;
 import org.tarrio.debloat.Codec.Decoder;
 import org.tarrio.debloat.Codec.Encoder;
 
-public abstract class AbstractCompressionAlgorithmImpl implements CompressionAlgorithm {
+/**
+ * A base class for the algorithm implementations provided with Debloat.
+ * 
+ * This base class sets the algorithm name in the encoder and closes it after
+ * compression, and also checks that the algoritm indicated by the decoder
+ * matches the algorithm this class implements.
+ * 
+ * @author Jacobo Tarrio
+ */
+public abstract class AbstractCompressionAlgorithmImpl implements
+		CompressionAlgorithm {
 
+	/**
+	 * Returns the name of the algorithm implemented by this class.
+	 */
 	protected abstract String getAlgorithmName();
 
+	/**
+	 * Override this function to implement the core compression algorithm.
+	 * 
+	 * The caller is in charge of setting the algorithm's name in the output
+	 * encoder and of closing it after encoding is done.
+	 * 
+	 * @param input
+	 *            The stream where the data to compress comes from.
+	 * @param outputEncoder
+	 *            The encoder to write the compressed data to.
+	 * @throws IOException
+	 *             If there was a problem reading or writing data.
+	 */
 	protected abstract void doCompress(InputStream input, Encoder outputEncoder)
 			throws IOException;
 
+	/**
+	 * Override this function to implement the core decompression algorithm.
+	 * 
+	 * The caller is in charge of checking that the algorithm's name in the
+	 * input decoder matches that returned by getAlgorithmName().
+	 * 
+	 * @param inputDecoder
+	 *            The decoder to read compressed data from.
+	 * @param input
+	 *            The stream where the uncompressed data will be written to.
+	 * @throws IOException
+	 *             If there was a problem reading or writing data.
+	 */
 	protected abstract void doDecompress(Decoder inputDecoder,
 			OutputStream output) throws IOException;
 
 	@Override
-	public void compress(InputStream input, Encoder outputEncoder)
+	public final void compress(InputStream input, Encoder outputEncoder)
 			throws IOException {
 		outputEncoder.setAlgorithm(getAlgorithmName());
 		doCompress(input, outputEncoder);
+		outputEncoder.close();
 	}
 
 	@Override
-	public void decompress(Decoder inputDecoder, OutputStream output)
+	public final void decompress(Decoder inputDecoder, OutputStream output)
 			throws IOException {
 		String algorithm = inputDecoder.getAlgoritm();
 		String thisName = getAlgorithmName();
@@ -37,5 +77,4 @@ public abstract class AbstractCompressionAlgorithmImpl implements CompressionAlg
 		}
 		doDecompress(inputDecoder, output);
 	}
-
 }

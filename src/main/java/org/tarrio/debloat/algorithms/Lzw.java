@@ -8,16 +8,32 @@ import org.tarrio.debloat.Symbol;
 import org.tarrio.debloat.Codec.Decoder;
 import org.tarrio.debloat.Codec.Encoder;
 
+/**
+ * Implementation of the Lempel-Ziv-Welch compression algorithm.
+ * 
+ * @author Jacobo Tarrio
+ */
 public class Lzw extends AbstractCompressionAlgorithmImpl {
 
 	static final int MAX_ENTRIES = 4096;
 
 	private int maxEntries;
 
+	/**
+	 * Creates a LZW compressor with a dictionary of size 4096.
+	 */
 	public Lzw() {
 		this(MAX_ENTRIES);
 	}
 
+	/**
+	 * Creates a LZW compressor with a dictionary of the given size.
+	 * 
+	 * Visible for testing.
+	 * 
+	 * @param maxEntries
+	 *            The maximum number of entries in the dictionary.
+	 */
 	Lzw(int maxEntries) {
 		this.maxEntries = maxEntries;
 	}
@@ -33,20 +49,20 @@ public class Lzw extends AbstractCompressionAlgorithmImpl {
 		byte[] buffer = new byte[maxEntries];
 		int bufTop = 0;
 		Dictionary dict = new Dictionary(maxEntries);
-		Integer prevEntry = null;
+		int prevEntry = -1;
 		int read = 1;
 		while (read > 0) {
 			if (dict.getSize() == maxEntries) {
 				dict.reset();
-				outputReset(outputEncoder);
+				outputEncoder.write(Symbol.newReset());
 			}
 			read = input.read(buffer, bufTop, 1);
 			if (read > 0) {
 				++bufTop;
 			}
-			Integer curEntry = dict.getEntryNum(buffer, bufTop);
-			if (prevEntry != null && curEntry == null) {
-				outputEntry(prevEntry, outputEncoder);
+			int curEntry = dict.getEntryNum(buffer, bufTop);
+			if (prevEntry != -1 && curEntry == -1) {
+				outputEncoder.write(Symbol.newDictionaryRef(prevEntry));
 				dict.addEntry(prevEntry, buffer, bufTop);
 				buffer[0] = buffer[bufTop - 1];
 				bufTop = 1;
@@ -55,10 +71,9 @@ public class Lzw extends AbstractCompressionAlgorithmImpl {
 				prevEntry = curEntry;
 			}
 		}
-		if (prevEntry != null) {
-			outputEntry(prevEntry, outputEncoder);
+		if (prevEntry != -1) {
+			outputEncoder.write(Symbol.newDictionaryRef(prevEntry));
 		}
-		outputEncoder.close();
 	}
 
 	@Override
@@ -102,15 +117,21 @@ public class Lzw extends AbstractCompressionAlgorithmImpl {
 		} while (symbol != null);
 	}
 
-	private void outputReset(Encoder outputEncoder) throws IOException {
-		outputEncoder.write(Symbol.newReset());
-	}
-
-	private void outputEntry(int entry, Encoder outputEncoder)
-			throws IOException {
-		outputEncoder.write(Symbol.newDictionaryRef(entry));
-	}
-
+	/**
+	 * A dictionary of byte sequences. Each new element of the dictionary
+	 * receives an item number in order of insertion, but they can be searched
+	 * efficiently via a hash table.
+	 * 
+	 * Each dictionary entry represents a string, and is stored as the last byte
+	 * in the string plus a pointer to an entry that represents the previous
+	 * bytes.
+	 * 
+	 * The number of hash buckets is higher than the number of elements to
+	 * reduce hash collisions as much as possible. The first 256 elements of the
+	 * dictionary represent all the 8-bit byte values so they aren't hashed.
+	 * 
+	 * @author Jacobo Tarrio
+	 */
 	private static class Dictionary {
 
 		private int hashBuckets;
@@ -118,28 +139,51 @@ public class Lzw extends AbstractCompressionAlgorithmImpl {
 		private DictEntry[] entries;
 		private int nextEntry;
 
+		/**
+		 * Creates a dictionary which is able to store the given number of
+		 * entries.
+		 * 
+		 * @param numEntries
+		 */
 		public Dictionary(int numEntries) {
-			hashBuckets = numEntries * 3 / 2;
+			hashBuckets = (int) Math.floor(numEntries * Math.sqrt(2));
 			hashTable = new int[hashBuckets];
 			entries = new DictEntry[numEntries];
+			for (int i = 0; i < 256; ++i) {
+				entries[i] = new DictEntry(null, (byte) i);
+			}
 			reset();
 		}
 
+		/**
+		 * Reset the dictionary to its default contents.
+		 */
 		public void reset() {
 			nextEntry = 257;
-			for (int i = 0; i < 256; ++i) {
-				entries[i] = new DictEntry(null, (byte) i);
-				hashTable[i] = i;
-			}
-			for (int i = 257; i < entries.length; ++i) {
+			for (int i = 0; i < hashBuckets; ++i) {
 				hashTable[i] = -1;
 			}
 		}
 
+		/**
+		 * Returns the number of elements currently in the dictionary.
+		 */
 		public int getSize() {
 			return nextEntry;
 		}
 
+		/**
+		 * Adds a new entry representing a byte preceded by a previous
+		 * dictionary entry.
+		 * 
+		 * @param prevEntry
+		 *            The dictionary entry that represents the previous bytes.
+		 * @param buffer
+		 *            The buffer where all the data is being processed.
+		 * @param bufTop
+		 *            The number of elements in the buffer.
+		 * @return The index of the new element.
+		 */
 		public int addEntry(int prevEntry, byte[] buffer, int bufTop) {
 			entries[nextEntry] = new DictEntry(entries[prevEntry],
 					buffer[bufTop - 1]);
@@ -152,7 +196,16 @@ public class Lzw extends AbstractCompressionAlgorithmImpl {
 			return nextEntry++;
 		}
 
-		public Integer getEntryNum(byte[] buffer, int bufTop) {
+		/**
+		 * Returns the index of an element that matches a byte sequence.
+		 * @param buffer The data to match.
+		 * @param bufTop The length of the data to match.
+		 * @return The index of the matching element, or -1 if none exists.
+		 */
+		public int getEntryNum(byte[] buffer, int bufTop) {
+			if (bufTop == 1) {
+				return buffer[0] & 0xff;
+			}
 			int hash = hash(buffer, bufTop);
 			int entryNum = hashTable[hash];
 			while (entryNum != -1 && !isHashBucket(hash, buffer, bufTop - 1)) {
@@ -163,7 +216,18 @@ public class Lzw extends AbstractCompressionAlgorithmImpl {
 			return entryNum == -1 ? null : entryNum;
 		}
 
+		/**
+		 * Fills a buffer with the contents of the element at the given index.
+		 * @param num The element index.
+		 * @param buffer The buffer to write the data to.
+		 * @param offset The offset within the buffer to start writing data.
+		 * @return The number of bytes copied.
+		 */
 		public int getEntry(int num, byte[] buffer, int offset) {
+			if (num < 256) {
+				buffer[offset] = (byte) num;
+				return 1;
+			}
 			DictEntry entry = entries[num];
 			int pos = 0;
 			while (entry != null) {
@@ -213,7 +277,5 @@ public class Lzw extends AbstractCompressionAlgorithmImpl {
 				this.thisByte = thisByte;
 			}
 		}
-
 	}
-
 }

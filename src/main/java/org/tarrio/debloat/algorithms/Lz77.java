@@ -31,7 +31,6 @@ public class Lz77 extends AbstractCompressionAlgorithmImpl {
 			encoder.write(symbol);
 			symbol = readNextSymbol(buffer);
 		}
-		encoder.close();
 	}
 
 	@Override
