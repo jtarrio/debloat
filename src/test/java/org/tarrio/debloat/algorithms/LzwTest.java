@@ -1,3 +1,19 @@
+/**
+ * Copyright 2012 Jacobo Tarrio
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.tarrio.debloat.algorithms;
 
 import java.io.ByteArrayInputStream;
@@ -12,11 +28,16 @@ import org.tarrio.debloat.Codec.Encoder;
 
 import junit.framework.TestCase;
 
+/**
+ * Tests for {@link Lzw}.
+ * 
+ * @author Jacobo Tarrio
+ */
 public class LzwTest extends TestCase {
 
 	private static final byte[] SIMPLE_EXAMPLE_BYTES = "TOBEORNOTTOBEORTOBEORNOT"
 			.getBytes();
-	
+
 	private static final byte[] REPEATED_BYTES = "TOTTTTTTBE".getBytes();
 
 	private static final Symbol[] SIMPLE_EXAMPLE_SYMBOLS = new Symbol[] {
@@ -41,13 +62,12 @@ public class LzwTest extends TestCase {
 			Symbol.newDictionaryRef('B'), Symbol.newDictionaryRef('E'),
 			Symbol.newDictionaryRef(257), Symbol.newDictionaryRef('N'),
 			Symbol.newDictionaryRef('O'), Symbol.newDictionaryRef('T') };
-	
+
 	private static final Symbol[] REPEATED_EXAMPLE_SYMBOLS = new Symbol[] {
-		Symbol.newDictionaryRef('T'), Symbol.newDictionaryRef('O'),
-		Symbol.newDictionaryRef('T'), 
-		Symbol.newDictionaryRef(259), Symbol.newDictionaryRef(260),
-		Symbol.newDictionaryRef('B'), Symbol.newDictionaryRef('E')
-	};
+			Symbol.newDictionaryRef('T'), Symbol.newDictionaryRef('O'),
+			Symbol.newDictionaryRef('T'), Symbol.newDictionaryRef(259),
+			Symbol.newDictionaryRef(260), Symbol.newDictionaryRef('B'),
+			Symbol.newDictionaryRef('E') };
 
 	private IMocksControl control;
 	private Encoder encoder;
@@ -80,7 +100,8 @@ public class LzwTest extends TestCase {
 		Lzw compressor = new Lzw();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
-		EasyMock.expect(decoder.getAlgoritm()).andReturn(compressor.getAlgorithmName());
+		EasyMock.expect(decoder.getAlgoritm()).andReturn(
+				compressor.getAlgorithmName());
 		for (int i = 0; i < SIMPLE_EXAMPLE_SYMBOLS.length; ++i) {
 			EasyMock.expect(decoder.read())
 					.andReturn(SIMPLE_EXAMPLE_SYMBOLS[i]);
@@ -118,10 +139,11 @@ public class LzwTest extends TestCase {
 		Lzw compressor = new Lzw();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
-		EasyMock.expect(decoder.getAlgoritm()).andReturn(compressor.getAlgorithmName());
+		EasyMock.expect(decoder.getAlgoritm()).andReturn(
+				compressor.getAlgorithmName());
 		for (int i = 0; i < RESETTING_EXAMPLE_SYMBOLS.length; ++i) {
-			EasyMock.expect(decoder.read())
-					.andReturn(RESETTING_EXAMPLE_SYMBOLS[i]);
+			EasyMock.expect(decoder.read()).andReturn(
+					RESETTING_EXAMPLE_SYMBOLS[i]);
 		}
 		EasyMock.expect(decoder.read()).andReturn(null);
 
@@ -138,8 +160,7 @@ public class LzwTest extends TestCase {
 
 	public void testCompressRepeatedText() throws Exception {
 		Lzw compressor = new Lzw();
-		ByteArrayInputStream stream = new ByteArrayInputStream(
-				REPEATED_BYTES);
+		ByteArrayInputStream stream = new ByteArrayInputStream(REPEATED_BYTES);
 
 		encoder.setAlgorithm(compressor.getAlgorithmName());
 		for (int i = 0; i < REPEATED_EXAMPLE_SYMBOLS.length; ++i) {
@@ -156,10 +177,11 @@ public class LzwTest extends TestCase {
 		Lzw compressor = new Lzw();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
-		EasyMock.expect(decoder.getAlgoritm()).andReturn(compressor.getAlgorithmName());
+		EasyMock.expect(decoder.getAlgoritm()).andReturn(
+				compressor.getAlgorithmName());
 		for (int i = 0; i < REPEATED_EXAMPLE_SYMBOLS.length; ++i) {
-			EasyMock.expect(decoder.read())
-					.andReturn(REPEATED_EXAMPLE_SYMBOLS[i]);
+			EasyMock.expect(decoder.read()).andReturn(
+					REPEATED_EXAMPLE_SYMBOLS[i]);
 		}
 		EasyMock.expect(decoder.read()).andReturn(null);
 
