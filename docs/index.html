@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Debloat Overview</title>
+</head>
+<body>
+	<h1>What's Debloat?</h1>
+	<p>Debloat is an Open-Source, extensible, Enterprise-ready data
+		compression/decompression framework.</p>
+	<p>It supports several compression algorithms and more can be
+		easily added using properties files, XML documents or even
+		programmatically with a simple declarative DSL!</p>
+	<p>It compresses the data into extensible, easy to parse,
+		human-readable and human-editable XML documents, which make it
+		extremely easy to integrate Debloat with other platforms!</p>
+
+	<p>
+		Debloat is distributed under the terms of <a
+			href="http://www.apache.org/licenses/LICENSE-2.0">the Apache
+			license</a>.
+	</p>
+
+	<h1>An Example</h1>
+
+	<p>To show you what Debloat can do, let's see how much Debloat can
+		compress the following text:</p>
+
+	<code>
+		<pre>Rose is a rose is a rose is a rose.</pre>
+	</code>
+
+	<p>Using the LZ77 algorithm, this 37-byte input gets compressed by
+		Debloat into just 15 symbols (14 bytes and 1 backwards reference):
+		almost 60% savings!</p>
+
+	<code>
+		<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;compressedData algorithm="lz77"&gt;
+  &lt;byte value="82"/&gt;
+  &lt;byte value="111"/&gt;
+  &lt;byte value="115"/&gt;
+  &lt;byte value="101"/&gt;
+  &lt;byte value="32"/&gt;
+  &lt;byte value="105"/&gt;
+  &lt;byte value="115"/&gt;
+  &lt;byte value="32"/&gt;
+  &lt;byte value="97"/&gt;
+  &lt;byte value="32"/&gt;
+  &lt;byte value="114"/&gt;
+  &lt;reference distance="10" length="23"/&gt;
+  &lt;byte value="46"/&gt;
+  &lt;byte value="13"/&gt;
+  &lt;byte value="10"/&gt;
+&lt;/compressedData&gt;</pre>
+	</code>
+
+	<p>As you can see, the output of Debloat is highly readable XML,
+		which makes it very easy to integrate Debloat with any other
+		frameworks, databases, etc., you may need. What's more, this output
+		can be fed back to Debloat for further compression, yielding
+		additional savings, and so on ad infinitum!</p>
+
+	<h1>Using Debloat in Your Own Application</h1>
+	<p>After downloading and adding Debloat to your library path, you
+		only need to do the following to compress the contents of a file into
+		another file using the Lempel-Ziv-Welch algorithm:</p>
+
+	<code>
+		<pre>
+FileInputStream inputStream = new FileInputStream("index.html");
+FileOutputStream outputStream = new FileOutputStream("index.html.xml");
+Codec codec = CodecFactory.getCodec();
+CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
+CompressionAlgorithm lzw = car.get("lzw");
+lzw.compress(inputStream, codec.getEncoder(outputStream));</pre>
+	</code>
+
+	<p>As you can see, the API is pretty simple and straightforward.
+		Also, the output file format is plain XML, so you can open it, inspect
+		it, and process it using your favourite tools! That's what makes
+		Debloat so special!</p>
+
+	<h1>Adding More Compression Algorithms</h1>
+	<p>Debloat comes with implementations of the LZ77 and
+		Lempel-Ziv-Welch algorithms, but if you want to add more algorithms,
+		it can be done quite easily!</p>
+
+	<p>The most common, and recommended, way is via a properties file.
+		The key for each property is the algorithm's name, and the value is
+		the full name of the class implementing that algorithm.</p>
+
+	<p>For example, suppose you have new RLE and LZMA implementations
+		you'd like to add. Just create a properties file like this:</p>
+	<code>
+		<pre>rle=com.example.compression.Rle
+lzma=com.example.compression.Lzma</pre>
+	</code>
+
+	<p>And then tell the CompressionAlgorithmRegistry to register the
+		algorithms specified in the properties file. For example:</p>
+
+	<code>
+		<pre>CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
+car.registerFromProperties(inputStream);
+</pre>
+	</code>
+
+	<p>You can also use an XML document to configure your algorithms:</p>
+
+	<code>
+		<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd"&gt;
+&lt;properties&gt;
+  &lt;entry key="rle"&gt;com.example.compression.Rle&lt;/entry&gt;
+  &lt;entry key="lzma"&gt;com.example.compression.Lzma&lt;/entry&gt;
+&lt;/properties&gt;</pre>
+	</code>
+
+	<p>
+		And you can load it with the
+		<tt>registerFromXml()</tt>
+		method:
+	</p>
+
+	<code>
+		<pre>CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
+car.registerFromXml(inputStream);
+</pre>
+	</code>
+
+	<p>
+		Finally, you can also configure your compression algorithms directly
+		from Java code with an easy to use declarative DSL. Just create a
+		subclass of
+		<tt>CompressionAlgorithmRegistrationModule</tt>
+		and override the
+		<tt>configure(CompressionAlgorithmBinder)</tt>
+		method:
+	</p>
+
+	<code>
+		<pre>
+public class MyCompressionAlgorithmRegistrationModule extends CompressionAlgorithmRegistrationModule {
+    @Override
+    void configure(CompressionAlgorithmBinder binder) {
+        binder.bind("rle").to(com.example.compression.Rle.class);
+        binder.bind("lzma").to(com.example.compression.Lzma.class);
+    }
+}</pre>
+	</code>
+
+	<p>Then, you can enable the configuration specified in this module
+		with just this code:</p>
+
+	<code>
+		<pre>CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
+car.registerFromModule(new MyCompressionAlgorithmRegistrationModule());
+</pre>
+	</code>
+
+	<p>
+		Registration via
+		<tt>CompressionAlgorithmRegistrationModule</tt>
+		s is even more flexible than that! In addition to classes, you can
+		bind singleton instances or providers for that extra flexibility!
+	</p>
+
+	<code>
+		<pre>
+public class MyCompressionAlgorithmRegistrationModule extends CompressionAlgorithmRegistrationModule {
+    @Override
+    void configure(CompressionAlgorithmBinder binder) {
+        binder.bind("rle").toInstance(new com.example.compression.Rle());
+        binder.bind("lzma").toProvider(new LzmaProvider());
+    }
+
+    private static class LzmaProvider implements CompressionAlgorithmProvider {
+        public CompressionAlgorithm get() {
+            return new com.example.compression.Lzma(16384); 
+        }
+    }
+}</pre>
+	</code>
+
+	<h1>License Terms</h1>
+
+	<p>Copyright 2012 Jacobo Tarrio</p>
+	<p>
+		Licensed under the Apache License, Version 2.0 (the "License"); you
+		may not use this file except in compliance with the License. You may
+		obtain a copy of the License at <a
+			href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>
+	</p>
+	<p>Unless required by applicable law or agreed to in writing,
+		software distributed under the License is distributed on an "AS IS"
+		BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+		implied. See the License for the specific language governing
+		permissions and limitations under the License.</p>
+
+</body>
+</html>
