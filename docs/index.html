@@ -2,6 +2,11 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style>
+pre {
+	font-family: monospace;
+}
+</style>
 <title>Debloat Overview</title>
 </head>
 <body>
@@ -26,16 +31,14 @@
 	<p>To show you what Debloat can do, let's see how much Debloat can
 		compress the following text:</p>
 
-	<code>
-		<pre>Rose is a rose is a rose is a rose.</pre>
-	</code>
+	<pre>Rose is a rose is a rose is a rose.</pre>
 
 	<p>Using the LZ77 algorithm, this 37-byte input gets compressed by
 		Debloat into just 15 symbols (14 bytes and 1 backwards reference):
 		almost 60% savings!</p>
 
-	<code>
-		<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+	<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;compressedData algorithm="lz77"&gt;
   &lt;byte value="82"/&gt;
   &lt;byte value="111"/&gt;
@@ -53,7 +56,7 @@
   &lt;byte value="13"/&gt;
   &lt;byte value="10"/&gt;
 &lt;/compressedData&gt;</pre>
-	</code>
+
 
 	<p>As you can see, the output of Debloat is highly readable XML,
 		which makes it very easy to integrate Debloat with any other
@@ -66,15 +69,14 @@
 		only need to do the following to compress the contents of a file into
 		another file using the Lempel-Ziv-Welch algorithm:</p>
 
-	<code>
-		<pre>
-FileInputStream inputStream = new FileInputStream("index.html");
+
+	<pre>FileInputStream inputStream = new FileInputStream("index.html");
 FileOutputStream outputStream = new FileOutputStream("index.html.xml");
 Codec codec = CodecFactory.getCodec();
 CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
 CompressionAlgorithm lzw = car.get("lzw");
 lzw.compress(inputStream, codec.getEncoder(outputStream));</pre>
-	</code>
+
 
 	<p>As you can see, the API is pretty simple and straightforward.
 		Also, the output file format is plain XML, so you can open it, inspect
@@ -92,30 +94,30 @@ lzw.compress(inputStream, codec.getEncoder(outputStream));</pre>
 
 	<p>For example, suppose you have new RLE and LZMA implementations
 		you'd like to add. Just create a properties file like this:</p>
-	<code>
-		<pre>rle=com.example.compression.Rle
+
+	<pre>rle=com.example.compression.Rle
 lzma=com.example.compression.Lzma</pre>
-	</code>
+
 
 	<p>And then tell the CompressionAlgorithmRegistry to register the
 		algorithms specified in the properties file. For example:</p>
 
-	<code>
-		<pre>CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
+
+	<pre>CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
 car.registerFromProperties(inputStream);
 </pre>
-	</code>
+
 
 	<p>You can also use an XML document to configure your algorithms:</p>
 
-	<code>
-		<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+	<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd"&gt;
 &lt;properties&gt;
   &lt;entry key="rle"&gt;com.example.compression.Rle&lt;/entry&gt;
   &lt;entry key="lzma"&gt;com.example.compression.Lzma&lt;/entry&gt;
 &lt;/properties&gt;</pre>
-	</code>
+
 
 	<p>
 		And you can load it with the
@@ -123,11 +125,11 @@ car.registerFromProperties(inputStream);
 		method:
 	</p>
 
-	<code>
-		<pre>CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
+
+	<pre>CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
 car.registerFromXml(inputStream);
 </pre>
-	</code>
+
 
 	<p>
 		Finally, you can also configure your compression algorithms directly
@@ -139,25 +141,24 @@ car.registerFromXml(inputStream);
 		method:
 	</p>
 
-	<code>
-		<pre>
-public class MyCompressionAlgorithmRegistrationModule extends CompressionAlgorithmRegistrationModule {
+
+	<pre>public class MyCompressionAlgorithmRegistrationModule extends CompressionAlgorithmRegistrationModule {
     @Override
     void configure(CompressionAlgorithmBinder binder) {
         binder.bind("rle").to(com.example.compression.Rle.class);
         binder.bind("lzma").to(com.example.compression.Lzma.class);
     }
 }</pre>
-	</code>
+
 
 	<p>Then, you can enable the configuration specified in this module
 		with just this code:</p>
 
-	<code>
-		<pre>CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
+
+	<pre>CompressionAlgorithmRegistry car = CompressionAlgorithmRegistry.getInstance();
 car.registerFromModule(new MyCompressionAlgorithmRegistrationModule());
 </pre>
-	</code>
+
 
 	<p>
 		Registration via
@@ -166,9 +167,8 @@ car.registerFromModule(new MyCompressionAlgorithmRegistrationModule());
 		bind singleton instances or providers for that extra flexibility!
 	</p>
 
-	<code>
-		<pre>
-public class MyCompressionAlgorithmRegistrationModule extends CompressionAlgorithmRegistrationModule {
+
+	<pre>public class MyCompressionAlgorithmRegistrationModule extends CompressionAlgorithmRegistrationModule {
     @Override
     void configure(CompressionAlgorithmBinder binder) {
         binder.bind("rle").toInstance(new com.example.compression.Rle());
@@ -181,7 +181,7 @@ public class MyCompressionAlgorithmRegistrationModule extends CompressionAlgorit
         }
     }
 }</pre>
-	</code>
+
 
 	<h1>License Terms</h1>
 
