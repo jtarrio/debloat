@@ -65,7 +65,7 @@ public abstract class AbstractCompressionAlgorithmImpl implements
 	 * 
 	 * @param inputDecoder
 	 *            The decoder to read compressed data from.
-	 * @param input
+	 * @param output
 	 *            The stream where the uncompressed data will be written to.
 	 * @throws IOException
 	 *             If there was a problem reading or writing data.
