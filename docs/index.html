@@ -64,10 +64,41 @@ pre {
 		can be fed back to Debloat for further compression, yielding
 		additional savings, and so on ad infinitum!</p>
 
+	<h1>Using Debloat From The Command Line</h1>
+	<p>
+		Debloat includes an example command-line application you can use to
+		compress files or the standard input/output. To use it, after
+		downloading or building the Debloat, you can run the following command
+		to compress the file
+		<tt>input.txt</tt>
+		into the file
+		<tt>output.xml</tt>
+		:
+	</p>
+
+	<pre>java -cp debloat-1.0.jar org.tarrio.debloat.DebloatCmd input.txt output.xml</pre>
+
+	<p>
+		To decompress a file, just use the
+		<tt>-d</tt>
+		command-line argument:
+	</p>
+
+	<pre>java -cp debloat-1.0.jar org.tarrio.debloat.DebloatCmd -d input.xml output.txt</pre>
+
+	<p>
+		You can choose the algorithm to compress the data with using the
+		<tt>-a</tt>
+		command-line argument:
+	</p>
+
+	<pre>java -cp debloat-1.0.jar org.tarrio.debloat.DebloatCmd -a=lzw input.txt output.xml</pre>
+
 	<h1>Using Debloat in Your Own Application</h1>
-	<p>After downloading and adding Debloat to your library path, you
-		only need to do the following to compress the contents of a file into
-		another file using the Lempel-Ziv-Welch algorithm:</p>
+	<p>After downloading or building the Debloat JAR file and adding it
+		to your library path, you only need to do the following to compress
+		the contents of a file into another file using the Lempel-Ziv-Welch
+		algorithm:</p>
 
 
 	<pre>FileInputStream inputStream = new FileInputStream("index.html");

@@ -4,11 +4,11 @@
 
 	<groupId>org.tarrio</groupId>
 	<artifactId>debloat</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<name>debloat</name>
-	<url>http://maven.apache.org</url>
+	<url>http://jacobo.tarrio.org/soft/debloat</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
