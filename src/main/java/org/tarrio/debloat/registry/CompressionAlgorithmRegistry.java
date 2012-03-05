@@ -36,7 +36,7 @@ public class CompressionAlgorithmRegistry {
 	/**
 	 * The name of the file resource containing the default configuration.
 	 */
-	private static final String XML_CONFIG_FILE = "algorithms.xml";
+	private static final String XML_CONFIG_FILE = "/algorithms.xml";
 
 	/**
 	 * The singleton instance.
