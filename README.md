@@ -29,4 +29,4 @@ You can see that this is a complete opaque bag of random symbols corresponding t
 </compressedData>
 ```
 
-Undoubtedly, this format has many, many advantages for Java Enterprise applications respect to the opaque binary blob.
+Undoubtedly, this format has many, many advantages for Java Enterprise applications compared to the opaque binary blob.
